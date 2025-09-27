@@ -27,16 +27,17 @@ const AppContent = () => {
   const uniqueTypes = Array.from(new Set(devices.map(d => (d.type || "unknown").toLowerCase()))).sort();
 
   return (
-    <div className="app-container">
-      <div className="controls">
-        <button onClick={() => setViewMode("card")} className={viewMode === "card" ? "active" : ""}>Card View</button>
-        <button onClick={() => setViewMode("table")} className={viewMode === "table" ? "active" : ""}>Table View</button>
-        <button onClick={() => scanDevices()} disabled={scanning}>{scanning ? "Scanning..." : "Scan Network"}</button>
-        <input type="text" placeholder="Search IP/MAC/Hostname..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+    <div className="app-container ">
+      <div className="controls d-flex p-2 mx-4 gap-4 ">
+         <input type="text" placeholder="Search IP/MAC/Hostname..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
         <select value={deviceType} onChange={(e) => setDeviceType(e.target.value)}>
           <option value="">All Types</option>
           {uniqueTypes.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
+        <button onClick={() => setViewMode("card")} className={viewMode === "card" ? "active" : ""}>Card View</button>
+        <button onClick={() => setViewMode("table")} className={viewMode === "table" ? "active" : ""}>Table View</button>
+        <button onClick={() => scanDevices()} disabled={scanning}>{scanning ? "Scanning..." : "Scan Network"}</button>
+       
       </div>
 
       {viewMode === "card" ? (

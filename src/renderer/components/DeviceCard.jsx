@@ -1,9 +1,10 @@
 import React from "react";
-
+import '../style/DeviceCard.css'
 export default function DeviceCard({ device, onClick }) {
   return (
-    <div className="col-sm-12 col-md-6 col-lg-3 d-flex">
-      <div className="e-card playing" onClick={() => onClick(device)}>
+    <div className=" col-4">
+      <div className="e-card playing " onClick={() => onClick(device)}>
+         {/* <div class="image"></div> */}
         <div className="wave"></div>
         <div className="wave"></div>
         <div className="wave"></div>
