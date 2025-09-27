@@ -9,3 +9,5 @@
 - [x] Add fetching of additional API data (account info, DNS, gateway, netmask) for speakers
 - [x] Fetch all speaker API endpoints (/api/get-system-info, /api/get-volume-priority, /api/get-provisioning, /api/get-sip-slave1-info) in one try-catch block
 - [x] Display API responses in modal as separate sections with headings and formatted JSON
+- [x] Implement device type detection by trying login APIs for Dasscom devices
+- [x] Add fetching of all IP phone API endpoints (version, svn_version, ipaddr, dns_inuse, gateway_inuse, netmask, account_status, call_status, account_infos, account_allinfos) for IP phones

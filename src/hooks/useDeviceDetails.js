@@ -58,7 +58,18 @@ export const useDeviceDetails = () => {
           // ignore login error and continue to try fetching info
           console.warn("loginDevice failed while fetching details:", loginErr);
         }
-        info = await window.api.fetchSystemInfo(device.ip);
+        // Fetch all IP phone info
+        info = {};
+        try { info.systemInfo = await window.api.fetchSystemInfo(device.ip); } catch (e) { console.warn("systemInfo failed:", e.message); }
+        try { info.svnVersion = await window.api.fetchSvnVersion(device.ip); } catch (e) { console.warn("svnVersion failed:", e.message); }
+        try { info.ipAddress = await window.api.fetchIpAddress(device.ip); } catch (e) { console.warn("ipAddress failed:", e.message); }
+        try { info.dns = await window.api.fetchDNS(device.ip); } catch (e) { console.warn("dns failed:", e.message); }
+        try { info.gateway = await window.api.fetchGetway(device.ip); } catch (e) { console.warn("gateway failed:", e.message); }
+        try { info.netmask = await window.api.fetchNetMask(device.ip); } catch (e) { console.warn("netmask failed:", e.message); }
+        try { info.accountStatus = await window.api.fetchAccountStatus(device.ip); } catch (e) { console.warn("accountStatus failed:", e.message); }
+        try { info.callStatus = await window.api.fetchCallStatus(device.ip); } catch (e) { console.warn("callStatus failed:", e.message); }
+        try { info.accountInfo = await window.api.fetchAccountInfo(device.ip); } catch (e) { console.warn("accountInfo failed:", e.message); }
+        try { info.allAccountInformation = await window.api.fetchAllAcountInformation(device.ip); } catch (e) { console.warn("allAccountInformation failed:", e.message); }
       }
 
       setSelectedDevice({ ...device, info });
