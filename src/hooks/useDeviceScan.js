@@ -20,7 +20,7 @@ export const useDeviceScan = () => {
         (rawDevices || []).map(async (d) => {
           try {
             const e = await enrichDevice(d);
-            const type = await detectDeviceTypeDynamic(e.mac, e.vendor, e.openPorts || []);
+            const type = await detectDeviceTypeDynamic(e, e.openPorts || []);
             return { ...e, type };
           } catch (err) {
             console.warn(`❌ enrichDevice failed for ${d.ip}:`, err && err.message ? err.message : err);

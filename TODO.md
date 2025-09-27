@@ -6,3 +6,6 @@
 - [x] Fix component prop issues in DeviceCard (remove onFetch, use onClick for both)
 - [x] Fix modal CSS class names to match DeviceModal.css
 - [x] Ensure modal displays API response on device click
+- [x] Add fetching of additional API data (account info, DNS, gateway, netmask) for speakers
+- [x] Fetch all speaker API endpoints (/api/get-system-info, /api/get-volume-priority, /api/get-provisioning, /api/get-sip-slave1-info) in one try-catch block
+- [x] Display API responses in modal as separate sections with headings and formatted JSON

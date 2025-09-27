@@ -16,12 +16,39 @@ export const useDeviceDetails = () => {
 
       if (type.includes("speaker")) {
         try {
-          // Try without token first
-          info = await window.api.speakerApi(device.ip, null, "/api/get-system-info");
-        } catch (noTokenErr) {
-          console.warn("API call without token failed, trying with login:", noTokenErr.message);
           const token = await window.api.speakerLogin(device.ip, "admin", "admin");
-          info = await window.api.speakerApi(device.ip, token, "/api/get-system-info");
+          const systemInfo = await window.api.speakerApi(device.ip, token, "/api/get-system-info");
+          const volumePriority = await window.api.speakerApi(device.ip, token, "/api/get-volume-priority");
+          const provisioning = await window.api.speakerApi(device.ip, token, "/api/get-privisioning");
+          const sipSlave1Info = await window.api.speakerApi(device.ip, token, "/api/get-sip-slave1-info");
+          info = { systemInfo, volumePriority, provisioning, sipSlave1Info };
+        } catch (err) {
+          console.warn("Speaker API fetch failed:", err.message);
+        }
+        // Also try old APIs if they work
+        try {
+          const accountInfo = await window.api.fetchAccountInfo(device.ip);
+          info = { ...info, accountInfo };
+        } catch (err) {
+          console.warn("Account info fetch failed for speaker:", err.message);
+        }
+        try {
+          const dnsInfo = await window.api.fetchDNS(device.ip);
+          info = { ...info, dnsInfo };
+        } catch (err) {
+          console.warn("DNS fetch failed for speaker:", err.message);
+        }
+        try {
+          const gatewayInfo = await window.api.fetchGetway(device.ip);
+          info = { ...info, gatewayInfo };
+        } catch (err) {
+          console.warn("Gateway fetch failed for speaker:", err.message);
+        }
+        try {
+          const netmaskInfo = await window.api.fetchNetMask(device.ip);
+          info = { ...info, netmaskInfo };
+        } catch (err) {
+          console.warn("Netmask fetch failed for speaker:", err.message);
         }
       } else {
         // IP phones / other

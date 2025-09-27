@@ -12,7 +12,9 @@ export function normalizeMac(mac) {
 /**
  * Detect device type dynamically (simple heuristic)
  */
-export async function detectDeviceTypeDynamic(mac, vendor, openPorts = []) {
+export async function detectDeviceTypeDynamic(device, openPorts = []) {
+  const mac = device.mac;
+  const vendor = device.vendor;
   const macPrefix = mac?.split(":").slice(0, 3).join(":") || "";
   const v = (vendor || "").toLowerCase();
 
@@ -25,7 +27,22 @@ export async function detectDeviceTypeDynamic(mac, vendor, openPorts = []) {
   if (openPorts.includes(554)) return "Camera"; // RTSP
   if (openPorts.includes(23)) return "Router"; // Telnet
 
-  if (macPrefix.startsWith("8C:1F:64")) return "Speaker"; // Example prefix for your speakers
+  // For Dasscom devices (MAC prefix 8C:1F:64), try login APIs to determine type
+  if (macPrefix.startsWith("8C:1F:64")) {
+    try {
+      await window.api.speakerLogin(device.ip, "admin", "admin");
+      return "Speaker";
+    } catch (err) {
+      console.warn(`Speaker login failed for ${device.ip}:`, err.message);
+    }
+    try {
+      await window.api.loginDevice(device.ip, "admin", "admin");
+      return "IP Phone";
+    } catch (err) {
+      console.warn(`IP Phone login failed for ${device.ip}:`, err.message);
+    }
+    return "Unknown"; // Both logins failed
+  }
 
   return "Unknown";
 }
