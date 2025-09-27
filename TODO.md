@@ -1,0 +1,8 @@
+- [x] Modify parseARP to include vendor lookup from MAC
+- [x] Remove MAC prefix filtering, return all ARP devices enriched
+- [x] In fallback, return all alive devices enriched without filtering
+- [x] Test the scan to ensure all network devices are detected
+- [x] Fix API authentication for speaker devices (remove "Bearer" prefix)
+- [x] Fix component prop issues in DeviceCard (remove onFetch, use onClick for both)
+- [x] Fix modal CSS class names to match DeviceModal.css
+- [x] Ensure modal displays API response on device click
