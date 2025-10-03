@@ -140,7 +140,7 @@ function parseNmapOutput(output) {
   const lines = output.split('\n');
 
   for (const line of lines) {
-    const hostMatch = line.match(/^Nmap scan report for (\d+\.\d+\.\d+\.\d+)/);
+    const hostMatch = line.match(/^Host:\s+(\d+\.\d+\.\d+\.\d+)/);
     if (hostMatch) {
       ips.push(hostMatch[1]);
     }
@@ -280,37 +280,7 @@ async function scanDevices({ useSubnetScan = false, ipAddr, netmask, useNmap = t
     if (!useNmap) {
       console.log('Using ARP-based scan...');
 
-      // First, do a ping sweep to populate ARP table
-      console.log('Performing ping sweep to populate ARP table...');
-      const pingPromises = [];
-      for (const subnetInfo of subnets) {
-        const subnet = ip.cidrSubnet(subnetInfo.subnetCidr);
-        const networkAddress = subnet.networkAddress;
-        const broadcastAddress = subnet.broadcastAddress;
-
-        // Ping all IPs in the subnet (excluding network and broadcast)
-        for (let i = 1; i < subnet.numHosts; i++) {
-          const ipAddr = ip.fromLong(ip.toLong(networkAddress) + i);
-          if (ipAddr !== subnetInfo.ipAddr) { // Don't ping ourselves
-            pingPromises.push(
-              ping.promise.probe(ipAddr, { timeout: 1 }).catch(() => ({ alive: false }))
-            );
-          }
-        }
-      }
-
-      // Execute ping sweep in batches to avoid overwhelming the network
-      const batchSize = 100; // Increased concurrency
-      for (let i = 0; i < pingPromises.length; i += batchSize) {
-        const batch = pingPromises.slice(i, i + batchSize);
-        await Promise.all(batch);
-        console.log(`Pinged batch ${Math.floor(i / batchSize) + 1} (${batch.length} IPs)`);
-      }
-
-      console.log('Ping sweep completed, waiting for ARP table to populate...');
-      await new Promise(resolve => setTimeout(resolve, 3000)); // Wait for ARP to populate
-
-      // Now read ARP table
+      // Read ARP table directly
       const command = os.platform() === "win32" ? "arp -a" : "arp -n";
       const arpOutput = await new Promise((resolve, reject) => {
         exec(command, (err, stdout) => {
@@ -320,7 +290,7 @@ async function scanDevices({ useSubnetScan = false, ipAddr, netmask, useNmap = t
       });
 
       const arpInterfaces = parseARP(arpOutput);
-      console.log('ARP interfaces after ping sweep:', Object.keys(arpInterfaces).map(ip => `${ip}: ${arpInterfaces[ip].length} devices`));
+      console.log('ARP interfaces:', Object.keys(arpInterfaces).map(ip => `${ip}: ${arpInterfaces[ip].length} devices`));
 
       // Collect devices from all interfaces
       for (const ifaceIp in arpInterfaces) {
