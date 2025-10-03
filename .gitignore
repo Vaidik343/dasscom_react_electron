@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+#build
+dist
+dist-installer
+
+TODO.md

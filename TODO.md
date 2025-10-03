@@ -1,13 +1,21 @@
-- [x] Modify parseARP to include vendor lookup from MAC
-- [x] Remove MAC prefix filtering, return all ARP devices enriched
-- [x] In fallback, return all alive devices enriched without filtering
-- [x] Test the scan to ensure all network devices are detected
-- [x] Fix API authentication for speaker devices (remove "Bearer" prefix)
-- [x] Fix component prop issues in DeviceCard (remove onFetch, use onClick for both)
-- [x] Fix modal CSS class names to match DeviceModal.css
-- [x] Ensure modal displays API response on device click
-- [x] Add fetching of additional API data (account info, DNS, gateway, netmask) for speakers
-- [x] Fetch all speaker API endpoints (/api/get-system-info, /api/get-volume-priority, /api/get-provisioning, /api/get-sip-slave1-info) in one try-catch block
-- [x] Display API responses in modal as separate sections with headings and formatted JSON
-- [x] Implement device type detection by trying login APIs for Dasscom devices
-- [x] Add fetching of all IP phone API endpoints (version, svn_version, ipaddr, dns_inuse, gateway_inuse, netmask, account_status, call_status, account_infos, account_allinfos) for IP phones
+# TODO: Integrate Nmap for Device Scanning
+
+## Tasks
+- [ ] Extract/Add Nmap binaries for Windows, Mac, Linux in binaries/ subfolders
+- [x] Modify scanDevices function in arpScanner.js to add Nmap scanning option
+- [x] Add scanWithNmap function to call local Nmap binary and parse output
+- [x] Update scanDevices to use Nmap with fallback to ARP
+- [x] Ensure cross-platform binary path resolution
+- [x] Update subnet detection to use local IP instead of ARP-based selection
+- [x] Enable Nmap scanning in UI by default
+- [x] Add fallback to system Nmap if bundled not found
+- [x] Add fs check for binary existence in scanWithNmap (only for absolute paths)
+- [x] Test the new scanning method (ARP fallback working, multi-subnet support verified)
+- [x] Verify device detection improvement (Nmap binary found but failing, fallback to ARP confirmed)
+- [x] Confirm Nmap binary bundling and path configuration (path resolved correctly, binary exists)
+
+## Notes
+- Binary bundling: Include Nmap executables in the Electron app package so users don't need separate installation.
+- Nmap command: Use `nmap -sn -oX - <subnet>` for XML output to parse IP and MAC.
+- Platforms: Handle paths for win32 (nmap.exe), darwin (nmap), linux (nmap).
+- Fallback: Keep option to use ARP scanning if Nmap fails or not preferred.

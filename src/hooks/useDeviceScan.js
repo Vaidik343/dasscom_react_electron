@@ -7,11 +7,11 @@ export const useDeviceScan = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const scanDevices = useCallback(async () => {
+  const scanDevices = useCallback(async (options = {}) => {
     setLoading(true);
     setError(null);
     try {
-      const rawDevices = await window.api.scanDevices(); // main ipc
+      const rawDevices = await window.api.scanDevices(options); // main ipc
       if (!Array.isArray(rawDevices)) {
         console.warn("scanDevices returned non-array:", rawDevices);
       }

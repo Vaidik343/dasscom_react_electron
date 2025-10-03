@@ -21,7 +21,7 @@ const AppContent = () => {
 
   useEffect(() => {
     // initial scan on mount
-    scanDevices().catch(err => console.error("Initial scan failed:", err));
+    scanDevices({ useNmap: true }).catch(err => console.error("Initial scan failed:", err));
   }, [scanDevices]);
 
   const uniqueTypes = Array.from(new Set(devices.map(d => (d.type || "unknown").toLowerCase()))).sort();
@@ -36,7 +36,7 @@ const AppContent = () => {
         </select>
         <button onClick={() => setViewMode("card")} className={viewMode === "card" ? "active" : ""}>Card View</button>
         <button onClick={() => setViewMode("table")} className={viewMode === "table" ? "active" : ""}>Table View</button>
-        <button onClick={() => scanDevices()} disabled={scanning}>{scanning ? "Scanning..." : "Scan Network"}</button>
+        <button onClick={() => scanDevices({ useNmap: true })} disabled={scanning}>{scanning ? "Scanning..." : "Scan Network"}</button>
        
       </div>
 

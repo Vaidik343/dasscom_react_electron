@@ -70,10 +70,10 @@ ipcMain.handle("enrich-device", async (event, device, credentials) => {
   return await enrichDevice(device, credentials);
 });
 
-ipcMain.handle("scan-devices", async () => {
-  console.log('🚀 IPC: scan-devices handler called');
+ipcMain.handle("scan-devices", async (event, options = {}) => {
+  console.log('🚀 IPC: scan-devices handler called with options:', options);
   try {
-    const devices = await scanDevices();
+    const devices = await scanDevices(options);
     console.log(`🚀 IPC: scan completed, found ${devices.length} devices`);
     return devices;
   } catch (error) {
