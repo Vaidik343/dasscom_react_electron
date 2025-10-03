@@ -14,7 +14,12 @@ function createWindow() {
     },
   });
 
-  win.loadURL("http://localhost:5173"); // Vite dev server
+  // Load the built index.html in production, or dev server in development
+  if (process.env.NODE_ENV === 'development') {
+    win.loadURL("http://localhost:5173");
+  } else {
+    win.loadFile(path.join(__dirname, "../../index.html"));
+  }
 }
 
 // IPC handlers

@@ -134,19 +134,28 @@ function getNmapPath() {
   return binaryName;
 }
 
-// Parse Nmap output for host discovery (returns IPs)
-function parseNmapOutput(output) {
-  const ips = [];
-  const lines = output.split('\n');
+// Parse Nmap XML output for host discovery (returns devices with IP and MAC)
+function parseNmapXmlOutput(output) {
+  const devices = [];
+  const hostRegex = /<host[^>]*>(.*?)<\/host>/gs;
+  let hostMatch;
 
-  for (const line of lines) {
-    const hostMatch = line.match(/^Host:\s+(\d+\.\d+\.\d+\.\d+)/);
-    if (hostMatch) {
-      ips.push(hostMatch[1]);
+  while ((hostMatch = hostRegex.exec(output)) !== null) {
+    const hostXml = hostMatch[1];
+    const ipMatch = hostXml.match(/<address addr="([^"]+)" addrtype="ipv4"\/>/);
+    const macMatch = hostXml.match(/<address addr="([^"]+)" addrtype="mac"\/>/);
+    const statusMatch = hostXml.match(/<status state="([^"]+)"/);
+
+    if (ipMatch && macMatch && statusMatch && statusMatch[1] === 'up') {
+      devices.push({
+        ip: ipMatch[1],
+        mac: macMatch[1].toLowerCase().replace(/:/g, '-'),
+        vendor: lookupVendor(macMatch[1])
+      });
     }
   }
 
-  return ips;
+  return devices;
 }
 
 async function scanWithNmap(subnet) {
@@ -158,7 +167,9 @@ async function scanWithNmap(subnet) {
     throw new Error(`Nmap binary not found at ${nmapPath}. Please download and place nmap.exe in binaries/win32/`);
   }
 
-  const args = ['-sn', '-PR', '-oG', '-', subnet];
+  // Use XML output for better parsing and include MAC addresses
+  // Add timing and rate options for faster scanning
+  const args = ['-sn', '-PR', '-oX', '-', '-T4', '--min-rate', '1000', '--max-retries', '1', '--host-timeout', '5s', subnet];
 
   return new Promise((resolve, reject) => {
     const nmap = spawn(nmapPath, args, { stdio: ['pipe', 'pipe', 'pipe'] });
@@ -177,7 +188,7 @@ async function scanWithNmap(subnet) {
       if (code === 0) {
         console.log('Nmap stdout:', stdout);
         console.log('Nmap stderr:', stderr);
-        const devices = parseNmapOutput(stdout);
+        const devices = parseNmapXmlOutput(stdout);
         console.log(`Nmap found ${devices.length} devices:`, devices);
         resolve(devices);
       } else {
@@ -204,72 +215,33 @@ async function scanDevices({ useSubnetScan = false, ipAddr, netmask, useNmap = t
     const subnets = getLocalNetworkSubnets();
     console.log(`Scanning ${subnets.length} subnets: ${subnets.map(s => s.subnetCidr).join(', ')}`);
 
-    let allAliveIps = [];
     let devices = [];
 
     if (useNmap) {
       try {
         console.log('Attempting Nmap scan on all subnets...');
 
-        // Scan all subnets with Nmap
-        for (const subnetInfo of subnets) {
-          console.log(`Scanning subnet: ${subnetInfo.subnetCidr}`);
-          try {
-            const aliveIps = await scanWithNmap(subnetInfo.subnetCidr);
-            console.log(`Subnet ${subnetInfo.subnetCidr} found ${aliveIps.length} alive IPs: ${aliveIps.join(', ')}`);
-            allAliveIps = allAliveIps.concat(aliveIps);
-          } catch (subnetError) {
-            console.warn(`Failed to scan subnet ${subnetInfo.subnetCidr}:`, subnetError.message);
-          }
-        }
+        // Scan all subnets with Nmap in parallel to speed up scanning
+        const scanPromises = subnets.map(subnetInfo => 
+          scanWithNmap(subnetInfo.subnetCidr)
+            .then(subnetDevices => {
+              console.log(`Subnet ${subnetInfo.subnetCidr} found ${subnetDevices.length} devices:`, subnetDevices.map(d => `${d.ip}:${d.mac}`).join(', '));
+              return subnetDevices;
+            })
+            .catch(subnetError => {
+              console.warn(`Failed to scan subnet ${subnetInfo.subnetCidr}:`, subnetError.message);
+              return [];
+            })
+        );
 
-        console.log(`Total Nmap scan completed, found ${allAliveIps.length} alive IPs across all subnets: ${allAliveIps.join(', ')}`);
+        const results = await Promise.all(scanPromises);
+        devices = results.flat();
 
-        if (allAliveIps.length === 0) {
-          console.log('No alive IPs found by Nmap, falling back to ARP scan');
+        console.log(`Total Nmap scan completed, found ${devices.length} devices across all subnets`);
+
+        if (devices.length === 0) {
+          console.log('No devices found by Nmap, falling back to ARP scan');
           useNmap = false;
-        } else if (allAliveIps.length > 0) {
-          // Ping the discovered IPs to populate ARP table
-          console.log('Pinging discovered IPs to populate ARP table...');
-          const concurrencyLimit = 20;
-          for (let i = 0; i < allAliveIps.length; i += concurrencyLimit) {
-            const batch = allAliveIps.slice(i, i + concurrencyLimit);
-            console.log(`Pinging batch ${Math.floor(i / concurrencyLimit) + 1}: ${batch.join(', ')}`);
-            await Promise.all(
-              batch.map(async (ipAddr) => {
-                try {
-                  await ping.promise.probe(ipAddr, { timeout: 2 });
-                } catch (error) {
-                  console.log(`Ping error for ${ipAddr}: ${error.message}`);
-                }
-              })
-            );
-          }
-
-          // Wait for ARP table to populate
-          console.log('Waiting 3 seconds for ARP table to populate...');
-          await new Promise(resolve => setTimeout(resolve, 3000));
-
-          // Read ARP table
-          const command = os.platform() === "win32" ? "arp -a" : "arp -n";
-          const arpOutput = await new Promise((resolve, reject) => {
-            exec(command, (err, stdout) => {
-              if (err) reject(err);
-              else resolve(stdout);
-            });
-          });
-
-          const arpInterfaces = parseARP(arpOutput);
-          console.log('ARP interfaces after Nmap:', Object.keys(arpInterfaces).map(ip => `${ip}: ${arpInterfaces[ip].length} devices`));
-
-          // Collect devices from all interfaces
-          for (const ifaceIp in arpInterfaces) {
-            devices = devices.concat(arpInterfaces[ifaceIp]);
-          }
-          console.log(`Collected ${devices.length} devices from all ARP interfaces`);
-        } else {
-          console.log('No alive IPs found by Nmap');
-          devices = [];
         }
       } catch (nmapError) {
         console.warn('Nmap scan failed, falling back to ARP scan:', nmapError.message);
