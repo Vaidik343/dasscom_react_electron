@@ -15,5 +15,9 @@ contextBridge.exposeInMainWorld("api", {
   speakerApi: (ip, token, endpoint) => ipcRenderer.invoke("speaker-api", ip, token, endpoint),
   enrichDevice: (device, credentials) => ipcRenderer.invoke("enrich-device", device, credentials),
 
-  scanDevices: () => ipcRenderer.invoke("scan-devices"),
+  scanDevices: (options = {}) => ipcRenderer.invoke("scan-devices", options),
+
+  receive: (channel, func) => {
+    ipcRenderer.on(channel, (event, ...args) => func(...args));
+  },
 });

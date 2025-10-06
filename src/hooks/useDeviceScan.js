@@ -11,6 +11,9 @@ export const useDeviceScan = () => {
     setLoading(true);
     setError(null);
     try {
+      if (!window.api || !window.api.scanDevices) {
+        throw new Error("API not available");
+      }
       const rawDevices = await window.api.scanDevices(options); // main ipc
       if (!Array.isArray(rawDevices)) {
         console.warn("scanDevices returned non-array:", rawDevices);

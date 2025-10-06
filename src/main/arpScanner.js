@@ -4,7 +4,6 @@ const { exec, spawn } = require("child_process");
 const os = require("os");
 const dns = require("dns");
 const util = require("util");
-const ping = require("ping");
 const net = require("net");
 const { scanSubnet } = require("./subnetScanner");
 const reverseLookup = util.promisify(dns.reverse);
@@ -123,8 +122,8 @@ function getNmapPath() {
     binaryName = 'nmap.exe';
   }
 
-  // First try bundled binary
-  const binariesDir = path.join(__dirname, '..', '..', '..', 'binaries');
+  // First try bundled binary in resources
+  const binariesDir = path.join(process.resourcesPath, 'binaries');
   const bundledPath = path.join(binariesDir, platform, binaryName);
   if (fs.existsSync(bundledPath)) {
     return bundledPath;
@@ -142,8 +141,8 @@ function parseNmapXmlOutput(output) {
 
   while ((hostMatch = hostRegex.exec(output)) !== null) {
     const hostXml = hostMatch[1];
-    const ipMatch = hostXml.match(/<address addr="([^"]+)" addrtype="ipv4"\/>/);
-    const macMatch = hostXml.match(/<address addr="([^"]+)" addrtype="mac"\/>/);
+    const ipMatch = hostXml.match(/<address addr="([^"]+)" addrtype="ipv4"[^>]*\/>/);
+    const macMatch = hostXml.match(/<address addr="([^"]+)" addrtype="mac"[^>]*\/>/);
     const statusMatch = hostXml.match(/<status state="([^"]+)"/);
 
     if (ipMatch && macMatch && statusMatch && statusMatch[1] === 'up') {
@@ -205,7 +204,7 @@ async function scanWithNmap(subnet) {
 
 
 // 🚀 Main scan function
-async function scanDevices({ useSubnetScan = false, ipAddr, netmask, useNmap = true, fallbackToArp = true } = {}) {
+async function scanDevices({ useSubnetScan = false, ipAddr, netmask, useNmap = true, fallbackToArp = true, debugMode = false } = {}) {
   if (useSubnetScan && ipAddr && netmask) {
     return scanSubnet(ipAddr, netmask);
   }
@@ -217,6 +216,10 @@ async function scanDevices({ useSubnetScan = false, ipAddr, netmask, useNmap = t
 
     let devices = [];
 
+    let nmapDevices = [];
+    let arpDevices = [];
+
+    // Always try both methods and combine results for maximum coverage
     if (useNmap) {
       try {
         console.log('Attempting Nmap scan on all subnets...');
@@ -235,41 +238,77 @@ async function scanDevices({ useSubnetScan = false, ipAddr, netmask, useNmap = t
         );
 
         const results = await Promise.all(scanPromises);
-        devices = results.flat();
+        nmapDevices = results.flat();
 
-        console.log(`Total Nmap scan completed, found ${devices.length} devices across all subnets`);
-
-        if (devices.length === 0) {
-          console.log('No devices found by Nmap, falling back to ARP scan');
-          useNmap = false;
-        }
+        console.log(`Total Nmap scan completed, found ${nmapDevices.length} devices across all subnets`);
       } catch (nmapError) {
-        console.warn('Nmap scan failed, falling back to ARP scan:', nmapError.message);
-        useNmap = false;
+        console.warn('Nmap scan failed:', nmapError.message);
       }
     }
 
-    if (!useNmap) {
-      console.log('Using ARP-based scan...');
+    // Always also do ARP scan for comprehensive coverage
+    console.log('Performing ARP-based scan...');
 
-      // Read ARP table directly
-      const command = os.platform() === "win32" ? "arp -a" : "arp -n";
-      const arpOutput = await new Promise((resolve, reject) => {
-        exec(command, (err, stdout) => {
-          if (err) reject(err);
-          else resolve(stdout);
+    // Nmap already does comprehensive discovery, so we just need to refresh ARP table
+    console.log('Refreshing ARP table for comprehensive device discovery...');
+
+    // For Windows, try to refresh ARP table to ensure it's up-to-date
+    if (os.platform() === "win32") {
+      try {
+        console.log('Refreshing ARP table on Windows...');
+        // Clear ARP cache to force rediscovery of devices
+        await new Promise((resolve) => {
+          exec('arp -d *', (err) => {
+            // Ignore errors, just trying to refresh ARP table
+            resolve();
+          });
         });
-      });
-
-      const arpInterfaces = parseARP(arpOutput);
-      console.log('ARP interfaces:', Object.keys(arpInterfaces).map(ip => `${ip}: ${arpInterfaces[ip].length} devices`));
-
-      // Collect devices from all interfaces
-      for (const ifaceIp in arpInterfaces) {
-        devices = devices.concat(arpInterfaces[ifaceIp]);
+        
+        // Wait a moment for ARP table to refresh
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (e) {
+        console.warn('Failed to refresh ARP table:', e.message);
       }
-      console.log(`Collected ${devices.length} devices from all ARP interfaces`);
     }
+
+    // Read ARP table directly
+    const command = os.platform() === "win32" ? "arp -a" : "arp -n";
+    const arpOutput = await new Promise((resolve, reject) => {
+      exec(command, (err, stdout) => {
+        if (err) reject(err);
+        else resolve(stdout);
+      });
+    });
+
+    const arpInterfaces = parseARP(arpOutput);
+    console.log('ARP interfaces:', Object.keys(arpInterfaces).map(ip => `${ip}: ${arpInterfaces[ip].length} devices`));
+
+    // Collect devices from all interfaces
+    for (const ifaceIp in arpInterfaces) {
+      arpDevices = arpDevices.concat(arpInterfaces[ifaceIp]);
+    }
+    console.log(`Collected ${arpDevices.length} devices from all ARP interfaces`);
+
+    // Combine and deduplicate devices from both methods
+    const deviceMap = new Map();
+    
+    // Add nmap devices first (they have more reliable MAC addresses)
+    nmapDevices.forEach(device => {
+      deviceMap.set(device.ip, device);
+    });
+    
+    // Add ARP devices, but don't overwrite nmap devices (they're more reliable)
+    arpDevices.forEach(device => {
+      if (!deviceMap.has(device.ip)) {
+        deviceMap.set(device.ip, device);
+      }
+    });
+
+    devices = Array.from(deviceMap.values());
+    console.log(`Combined scan results: ${devices.length} unique devices (${nmapDevices.length} from nmap, ${arpDevices.length} from ARP)`);
+
+    // Nmap and ARP should be sufficient for device discovery
+    console.log(`Final device count: ${devices.length} devices found using nmap + ARP scanning`);
 
     // Debug: Log all devices found before filtering
     console.log('All devices found before filtering:');
@@ -278,8 +317,24 @@ async function scanDevices({ useSubnetScan = false, ipAddr, netmask, useNmap = t
     });
 
     // Filter for Dasscom devices (MAC prefix 8C:1F:64)
+    console.log('Debug: Checking MAC addresses for Dasscom prefix:');
+    devices.forEach((device, index) => {
+      if (device.mac) {
+        const normalized = normalizeMac(device.mac);
+        const prefix = normalized?.split(":").slice(0, 3).join(":") || "";
+        console.log(`Device ${index + 1}: Original MAC: ${device.mac}, Normalized: ${normalized}, Prefix: ${prefix}, Is Dasscom: ${prefix === '8C:1F:64'}`);
+      }
+    });
+    
     const dasscomDevices = devices.filter(device => device.mac && normalizeMac(device.mac).startsWith('8C:1F:64'));
     console.log(`Filtered to ${dasscomDevices.length} Dasscom devices (MAC prefix 8C:1F:64) out of ${devices.length}`);
+
+    // In debug mode, return all devices for testing
+    if (debugMode) {
+      console.log('DEBUG MODE: Returning all devices instead of just Dasscom devices');
+      const enrichedDevices = await Promise.all(devices.map(enrichDevice));
+      return enrichedDevices;
+    }
 
     const enrichedDevices = await Promise.all(dasscomDevices.map(enrichDevice));
 
