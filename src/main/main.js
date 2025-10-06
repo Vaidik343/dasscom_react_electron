@@ -1,17 +1,11 @@
 // src/main/main.js
 const { app, BrowserWindow, ipcMain } = require("electron");
+const { dialog } = require("electron");
+const exportToExcel = require("../utils/exportToExcel");
 const path = require("path");
 const {
   login,
-  fetchSystemInfo,
-  fetchSvnVersion,
-  fetchIpAddress,
-  fetchAccountInfo,
-  fetchDNS,
-  fetchGetway,
-  fetchNetMask,
-  fetchAccountStatus,
-  fetchAllAcountInformation,
+  ipPhoneApi,
   speakerLogin,
   speakerApi
 } = require("../api/dasscomClient");
@@ -28,6 +22,7 @@ function createWindow() {
       contextIsolation: true,
       preload: path.join(app.getAppPath(), "src", "preload", "preload.js"),
       webSecurity: false, // ✅ allow loading local files inside ASAR
+      nodeIntegration: false
     },
   });
 
@@ -72,18 +67,26 @@ function createWindow() {
 }
 
 // --- IPC handlers ---
+// IP Phone APIs (2 functions like speaker APIs)
 ipcMain.handle("login-device", async (event, ip, username, password) => login(ip, username, password));
-ipcMain.handle("fetch-system-info", async (event, ip, token) => fetchSystemInfo(ip, token));
+ipcMain.handle("ip-phone-api", async (event, ip, endpoint, method = "GET", body = null) => ipPhoneApi(ip, endpoint, method, body));
+
+// Speaker APIs (2 functions)
 ipcMain.handle("speaker-login", async (event, ip, username = "admin", password = "admin") => speakerLogin(ip, username, password));
 ipcMain.handle("speaker-api", async (event, ip, token, endpoint) => speakerApi(ip, token, endpoint));
-ipcMain.handle("fetch-svn-version", async (event, ip) => fetchSvnVersion(ip));
-ipcMain.handle("fetch-ip-address", async (event, ip) => fetchIpAddress(ip));
-ipcMain.handle("fetch-account-info", async (event, ip) => fetchAccountInfo(ip));
-ipcMain.handle("fetch-dns", async (event, ip) => fetchDNS(ip));
-ipcMain.handle("fetch-gateway", async (event, ip) => fetchGetway(ip));
-ipcMain.handle("fetch-netmask", async (event, ip) => fetchNetMask(ip));
-ipcMain.handle("fetch-account-status", async (event, ip) => fetchAccountStatus(ip));
-ipcMain.handle("fetch-all-account-info", async (event, ip) => fetchAllAcountInformation(ip));
+
+// IP Phone API handlers using unified ipPhoneApi function
+ipcMain.handle("fetch-system-info", async (event, ip, token) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=version'));
+ipcMain.handle("fetch-svn-version", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=svn_version'));
+ipcMain.handle("fetch-ip-address", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=ipaddr'));
+ipcMain.handle("fetch-account-info", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=account_infos'));
+ipcMain.handle("fetch-dns", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=dns_inuse'));
+ipcMain.handle("fetch-gateway", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=gateway_inuse'));
+ipcMain.handle("fetch-netmask", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=netmask'));
+ipcMain.handle("fetch-account-status", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=account_status'));
+ipcMain.handle("fetch-all-account-info", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=account_allinfos'));
+ipcMain.handle("fetch-temperature", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=temperature'));
+
 ipcMain.handle("enrich-device", async (event, device, credentials) => enrichDevice(device, credentials));
 
 ipcMain.handle("scan-devices", async (event, options = {}) => {
@@ -98,6 +101,31 @@ ipcMain.handle("scan-devices", async (event, options = {}) => {
   }
 });
 
+ipcMain.handle("export-to-excel", async (event, devices) => {
+  try {
+    // open save dialog
+    const { canceled, filePath } = await dialog.showSaveDialog({
+      title: "Save Network Scan Report",
+      defaultPath: "network_scan.xlsx",
+      filters: [
+        { name: "Excel Files", extensions: ["xlsx"] },
+        { name: "All Files", extensions: ["*"] },
+      ],
+    });
+
+    if (canceled || !filePath) {
+      return { success: false, error: "User cancelled" };
+    }
+
+    // call the export function
+    const savedPath = await exportToExcel(devices, filePath);
+    return { success: true, path: savedPath };
+
+  } catch (err) {
+    console.error("Export failed:", err);
+    return { success: false, error: err.message };
+  }
+});
 app.whenReady().then(createWindow);
 
 // macOS behavior

@@ -1,4 +1,7 @@
 import React from "react";
+import webViewArrow from '../../assets/icons/arrow-up-right-from-square-solid-full.svg';
+
+
 import '../style/DeviceCard.css'
 export default function DeviceCard({ device, onClick }) {
   return (
@@ -36,7 +39,7 @@ export default function DeviceCard({ device, onClick }) {
           >
             <strong>Web view:</strong>
             <img
-              src="assets/icons/arrow-up-right-from-square-solid-full.svg"
+              src
               alt="redirect icon"
               style={{ width: 12, height: 12, marginLeft: 5, verticalAlign: "middle" }}
             />

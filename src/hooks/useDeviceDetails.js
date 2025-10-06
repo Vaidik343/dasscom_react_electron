@@ -21,7 +21,17 @@ export const useDeviceDetails = () => {
           const volumePriority = await window.api.speakerApi(device.ip, token, "/api/get-volume-priority");
           const provisioning = await window.api.speakerApi(device.ip, token, "/api/get-privisioning");
           const sipSlave1Info = await window.api.speakerApi(device.ip, token, "/api/get-sip-slave1-info");
-          info = { systemInfo, volumePriority, provisioning, sipSlave1Info };
+
+
+          const sipSlave2Info = await window.api.speakerApi(device.ip, token, "/api/get-sip-slave2-info");
+          const functionInfo = await window.api.speakerApi(device.ip, token, "/api/get-sip-function-info");
+          const masterInfo = await window.api.speakerApi(device.ip, token, "/api/get-sip-master-info");
+          const advanceInfo = await window.api.speakerApi(device.ip, token, "/api/get-sip-advance-info");
+          const sip = await window.api.speakerApi(device.ip, token, "/api/get-sipapi");
+          const language = await window.api.speakerApi(device.ip, token, "/api/get-language");
+          const audio = await window.api.speakerApi(device.ip, token, "/api/get-audio-codec");
+
+          info = { systemInfo, volumePriority, provisioning, sipSlave1Info,sipSlave2Info , functionInfo, masterInfo, advanceInfo, sip,language , audio};
         } catch (err) {
           console.warn("Speaker API fetch failed:", err.message);
         }
@@ -68,6 +78,7 @@ export const useDeviceDetails = () => {
         try { info.netmask = await window.api.fetchNetMask(device.ip); } catch (e) { console.warn("netmask failed:", e.message); }
         try { info.accountStatus = await window.api.fetchAccountStatus(device.ip); } catch (e) { console.warn("accountStatus failed:", e.message); }
         try { info.callStatus = await window.api.fetchCallStatus(device.ip); } catch (e) { console.warn("callStatus failed:", e.message); }
+        try { info.temperature = await window.api.fetchTemperature(device.ip); } catch (e) { console.warn("temperature failed:", e.message); }
         try { info.accountInfo = await window.api.fetchAccountInfo(device.ip); } catch (e) { console.warn("accountInfo failed:", e.message); }
         try { info.allAccountInformation = await window.api.fetchAllAcountInformation(device.ip); } catch (e) { console.warn("allAccountInformation failed:", e.message); }
       }
