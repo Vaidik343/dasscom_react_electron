@@ -19,7 +19,7 @@ export default function DeviceList() {
   return (
     <>
       {viewMode === "card" ? (
-        <div className="card-container d-flex col-8">
+        <div className="card-container d-flex flex-wrap col">
           {filteredDevices.map(d => (
             <DeviceCard key={d.ip} device={d} onClick={fetchDetails} />
           ))}

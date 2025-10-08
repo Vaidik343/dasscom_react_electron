@@ -5,7 +5,7 @@ import webViewArrow from '../../assets/icons/arrow-up-right-from-square-solid-fu
 import '../style/DeviceCard.css'
 export default function DeviceCard({ device, onClick }) {
   return (
-    <div className=" col-4">
+    <div className=" col-4 ">
       <div className="e-card playing " onClick={() => onClick(device)}>
          {/* <div class="image"></div> */}
         <div className="wave"></div>
@@ -39,7 +39,7 @@ export default function DeviceCard({ device, onClick }) {
           >
             <strong>Web view:</strong>
             <img
-              src
+              src={webViewArrow}
               alt="redirect icon"
               style={{ width: 12, height: 12, marginLeft: 5, verticalAlign: "middle" }}
             />

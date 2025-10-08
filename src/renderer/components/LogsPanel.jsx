@@ -37,7 +37,7 @@ const { scanDevices, loading: scanning } = useDeviceScan();
       {showLogs && (
         <div
           style={{
-            backgroundColor: "#f0f0f0",
+            backgroundColor: "black",
             padding: "10px",
             margin: "10px",
             borderRadius: "5px",
