@@ -122,8 +122,8 @@ function getNmapPath() {
     binaryName = 'nmap.exe';
   }
 
-  // First try bundled binary in resources
-  const binariesDir = path.join(process.resourcesPath, 'binaries');
+  // First try bundled binary in app dir
+  const binariesDir = path.join(path.dirname(process.execPath), 'binaries');
   const bundledPath = path.join(binariesDir, platform, binaryName);
   if (fs.existsSync(bundledPath)) {
     return bundledPath;

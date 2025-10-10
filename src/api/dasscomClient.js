@@ -49,7 +49,7 @@ async function ipPhoneApi(ip, endpoint, method = "GET", body = null) {
 
 
 //login
-async function login(ip, username, password) {
+async function login(ip, username, password, options = {}) {
   console.log("🚀 ~ login ~ login:", ip, username);
 
   const controller = new AbortController();
@@ -86,7 +86,9 @@ async function login(ip, username, password) {
     } else {
       // ❌ API login failed → open normal web UI
       console.warn(`⚠️ Login endpoint failed (${res.status}), opening in browser...`);
-      // shell.openExternal(`http://${ip}`);
+      // if (!options.noBrowser) {
+      //   shell.openExternal(`http://${ip}`);
+      // }
       // return { openedBrowser: true };
     }
   } catch (error) {
@@ -94,8 +96,8 @@ async function login(ip, username, password) {
     console.error("❌ Login request error:", error.message);
 
     // If request itself failed (timeout / network) → still open browser
-    shell.openExternal(`http://${ip}`);
-    return { openedBrowser: true };
+    // shell.openExternal(`http://${ip}`);
+    // return { openedBrowser: true };
   }
 }
 

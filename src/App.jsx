@@ -10,7 +10,7 @@ export default function App() {
     <DeviceProvider>
       <div className="app-container">
         <Controls />
-        {/* <LogsPanel /> */}
+        <LogsPanel />
         <DeviceList />
         <DeviceModal />
       </div>

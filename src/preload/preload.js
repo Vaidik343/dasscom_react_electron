@@ -2,7 +2,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("api", {
   // IP Phone APIs (2 functions like speaker APIs)
-  loginDevice: (ip, user, pass) => ipcRenderer.invoke("login-device", ip, user, pass),
+  loginDevice: (ip, user, pass, options = {}) => ipcRenderer.invoke("login-device", ip, user, pass, options),
   ipPhoneApi: (ip, endpoint, method, body) => ipcRenderer.invoke("ip-phone-api", ip, endpoint, method, body),
   
   // Speaker APIs (2 functions)
@@ -24,7 +24,8 @@ contextBridge.exposeInMainWorld("api", {
   fetchAccountStatus: (ip) => ipcRenderer.invoke("fetch-account-status", ip),
   fetchAllAcountInformation: (ip) => ipcRenderer.invoke("fetch-all-account-info", ip),
   fetchTemperature: (ip) => ipcRenderer.invoke("fetch-temperature", ip),
- exportToExcel: (devices) => ipcRenderer.invoke("export-to-excel", devices),
+  nmapScan: (ip) => ipcRenderer.invoke("nmap-scan", ip),
+  exportToExcel: (devices) => ipcRenderer.invoke("export-to-excel", devices),
 
   receive: (channel, func) => {
     ipcRenderer.on(channel, (event, ...args) => func(...args));

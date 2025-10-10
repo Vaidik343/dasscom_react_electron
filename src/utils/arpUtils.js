@@ -2,11 +2,12 @@ const fs = require("fs");
 const path = require("path");
 
 const OUI_DB = {};
+const deviceMappings = require('../config/device-mappings.json');
 
 // Load OUI database from file
 function loadOUIDatabase() {
   let ouiFile;
-  
+
   // Try multiple possible locations for the OUI file
   const possiblePaths = [
     // Development path
@@ -48,18 +49,18 @@ function loadOUIDatabase() {
     const lines = fs.readFileSync(ouiFile, "utf8").split("\n");
     let loadedCount = 0;
     let skippedCount = 0;
-    
+
     for (const line of lines) {
       const trimmedLine = line.trim();
-      
+
       // Skip empty lines and comments
       if (!trimmedLine || trimmedLine.startsWith("#")) {
         continue;
       }
-      
+
       // Handle multiple OUI formats
       let hex, vendor;
-      
+
       // Format 1: XX-XX-XX (hex) Vendor Name
       if (trimmedLine.includes("(hex)")) {
         [hex, vendor] = trimmedLine.split("(hex)").map(s => s.trim());
@@ -80,14 +81,14 @@ function loadOUIDatabase() {
           vendor = match[2].trim();
         }
       }
-      
+
       if (hex && vendor) {
         // Normalize the MAC prefix format to uppercase with colons
         const prefix = hex.replace(/-/g, ":").toUpperCase();
-        
+
         // Clean up vendor name (remove trailing comments, extra spaces)
         vendor = vendor.replace(/#.*$/, '').trim();
-        
+
         // Only add if we have a valid vendor name
         if (vendor && vendor !== "(base 16)") {
           OUI_DB[prefix] = vendor;
@@ -99,7 +100,7 @@ function loadOUIDatabase() {
         skippedCount++;
       }
     }
-    
+
     console.log(`✅ Loaded ${loadedCount} vendor entries from OUI database`);
     if (skippedCount > 0) {
       console.log(`⚠️ Skipped ${skippedCount} invalid or malformed entries`);
@@ -129,18 +130,18 @@ function lookupVendor(mac) {
   if (!normalized) return "Unknown";
 
   const prefix = normalized.split(":").slice(0, 3).join(":");
-  
+
   // Direct lookup first
   if (OUI_DB[prefix]) {
     return OUI_DB[prefix];
   }
-  
+
   // Try case-insensitive lookup
   const upperPrefix = prefix.toUpperCase();
   if (OUI_DB[upperPrefix]) {
     return OUI_DB[upperPrefix];
   }
-  
+
   // Try partial matches (first 2 octets) as fallback
   const partialPrefix = prefix.split(":").slice(0, 2).join(":");
   for (const [dbPrefix, vendor] of Object.entries(OUI_DB)) {
@@ -148,7 +149,12 @@ function lookupVendor(mac) {
       return vendor;
     }
   }
-  
+
+  // Fallback to deviceMappings.macPrefixes
+  if (deviceMappings.macPrefixes && deviceMappings.macPrefixes[prefix]) {
+    return deviceMappings.macPrefixes[prefix];
+  }
+
   return "Unknown";
 }
 

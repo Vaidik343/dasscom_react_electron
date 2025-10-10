@@ -10,6 +10,7 @@ const {
   speakerApi
 } = require("../api/dasscomClient");
 const { scanDevices } = require("./arpScanner");
+const { runNmapScan } = require("./nmapScanner");
 const { enrichDevice } = require("../utils/deviceUtils");
 
 const isDev = process.env.NODE_ENV === "development";
@@ -68,7 +69,7 @@ function createWindow() {
 
 // --- IPC handlers ---
 // IP Phone APIs (2 functions like speaker APIs)
-ipcMain.handle("login-device", async (event, ip, username, password) => login(ip, username, password));
+ipcMain.handle("login-device", async (event, ip, username, password, options = {}) => login(ip, username, password, options));
 ipcMain.handle("ip-phone-api", async (event, ip, endpoint, method = "GET", body = null) => ipPhoneApi(ip, endpoint, method, body));
 
 // Speaker APIs (2 functions)
@@ -124,6 +125,17 @@ ipcMain.handle("export-to-excel", async (event, devices) => {
   } catch (err) {
     console.error("Export failed:", err);
     return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle("nmap-scan", async (event, ip) => {
+  console.log(`🚀 IPC: nmap-scan called for ${ip}`);
+  try {
+    const result = await runNmapScan(ip);
+    return result;
+  } catch (error) {
+    console.error(`🚀 IPC: nmap-scan error for ${ip}:`, error);
+    return null;
   }
 });
 app.whenReady().then(createWindow);

@@ -14,7 +14,7 @@ export const useDeviceDetails = () => {
       let info = null;
       const type = (device.type || "").toLowerCase();
 
-      if (type.includes("speaker")) {
+      if (type.includes("speaker") || type.includes("extension")) {
         try {
           const token = await window.api.speakerLogin(device.ip, "admin", "admin");
           const systemInfo = await window.api.speakerApi(device.ip, token, "/api/get-system-info");
