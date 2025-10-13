@@ -124,7 +124,18 @@ export default function DeviceModal() {
         sipAdvanceInfo: "⚡",
         sipApi: "📡",
         language: "🗣️",
-        audioCodec: "🔈"
+        audioCodec: "🔈",
+        // PBX-specific APIs
+        systemTime: "🕒",
+        version: "🏷️",
+        cpu: "⚙️",
+        memory: "🧠",
+        disk: "💾",
+        calls: "📞",
+        extensionStatus: "👥",
+        trunkInfo: "🌐",
+        extensions: "📋",
+        extensionInfo: "👤"
       };
 
       // Generate display name from key

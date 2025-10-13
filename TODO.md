@@ -1,11 +1,10 @@
-# TODO: Add Device Type Logging
+# PBX Endpoints Integration
 
-- [x] Modify `detectDeviceTypeDynamic` in `src/utils/deviceUtils.js` to add console.log for each detected device type
-  - [x] Add logging for NMAP-based detections (Camera, IP Phone, Speaker, etc.)
-  - [x] Add logging for vendor mapping fallback
-  - [x] Add logging for API login detections (Speaker and IP Phone)
-  - [x] Add logging for Unknown type
-- [x] Test logging in development environment by running a device scan
-- [x] Test logging in packaged app environment
-- [x] Verify logs show correct format: "Detected [Device Type] for [IP] ([MAC])"
-- [x] Fix NMAP command to work without Npcap by changing -sS to -sT, removing -O and upnp-info script
+## Steps to Complete
+
+- [x] Add PBX API functions in src/api/dasscomClient.js (pbxLogin, pbxApi)
+- [x] Add IPC handlers in src/main/main.js for PBX login and API calls
+- [x] Expose PBX methods in src/preload/preload.js
+- [x] Update src/hooks/useDeviceDetails.js to detect PBX devices and fetch data
+- [x] Test PBX login and common endpoints (integrated into modal display)
+- [x] Test device-specific endpoints based on model (integrated into modal display)

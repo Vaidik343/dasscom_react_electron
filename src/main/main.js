@@ -7,7 +7,9 @@ const {
   login,
   ipPhoneApi,
   speakerLogin,
-  speakerApi
+  speakerApi,
+  pbxLogin,
+  pbxApi
 } = require("../api/dasscomClient");
 const { scanDevices } = require("./arpScanner");
 const { runNmapScan } = require("./nmapScanner");
@@ -50,12 +52,12 @@ function createWindow() {
   console.log = (...args) => {
     originalLog(...args);
     try {
-      win.webContents.send(
+      win.webContents.send( 
         "console-log",
         args.map(a => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ")
       );
     } catch (e) {}
-  };
+  }; 
   console.error = (...args) => {
     originalError(...args);
     try {
@@ -76,6 +78,10 @@ ipcMain.handle("ip-phone-api", async (event, ip, endpoint, method = "GET", body 
 ipcMain.handle("speaker-login", async (event, ip, username = "admin", password = "admin") => speakerLogin(ip, username, password));
 ipcMain.handle("speaker-api", async (event, ip, token, endpoint) => speakerApi(ip, token, endpoint));
 
+// PBX APIs (2 functions)
+ipcMain.handle("pbx-login", async (event, ip, username = "admin", password = "admin") => pbxLogin(ip, username, password));
+ipcMain.handle("pbx-api", async (event, ip, token, endpoint) => pbxApi(ip, token, endpoint));
+
 // IP Phone API handlers using unified ipPhoneApi function
 ipcMain.handle("fetch-system-info", async (event, ip, token) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=version'));
 ipcMain.handle("fetch-svn-version", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=svn_version'));
@@ -87,6 +93,21 @@ ipcMain.handle("fetch-netmask", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/in
 ipcMain.handle("fetch-account-status", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=account_status'));
 ipcMain.handle("fetch-all-account-info", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=account_allinfos'));
 ipcMain.handle("fetch-temperature", async (event, ip) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=temperature'));
+
+// PBX API handlers using unified pbxApi function
+ipcMain.handle("fetch-pbx-system-time", async (event, ip, token) => pbxApi(ip, token, '/pbx/systeminfo/system-current-time'));
+ipcMain.handle("fetch-pbx-version", async (event, ip, token) => pbxApi(ip, token, '/pbx/systeminfo/version'));
+ipcMain.handle("fetch-pbx-cpu", async (event, ip, token) => pbxApi(ip, token, '/pbx/systeminfo/cpu'));
+ipcMain.handle("fetch-pbx-mem", async (event, ip, token) => pbxApi(ip, token, '/pbx/systeminfo/mem'));
+ipcMain.handle("fetch-pbx-disk", async (event, ip, token) => pbxApi(ip, token, '/pbx/systeminfo/disk'));
+ipcMain.handle("fetch-pbx-calls", async (event, ip, token) => pbxApi(ip, token, '/pbx/systeminfo/calls'));
+ipcMain.handle("fetch-pbx-extension-status", async (event, ip, token) => pbxApi(ip, token, '/pbx/systeminfo/extension-status'));
+ipcMain.handle("fetch-pbx-trunk-info", async (event, ip, token) => pbxApi(ip, token, '/pbx/systeminfo/trunk-info'));
+
+// Device-specific PBX endpoints
+ipcMain.handle("fetch-pbx-search-extensions", async (event, ip, token) => pbxApi(ip, token, '/pbx/extension-digital/search-extension-page'));
+ipcMain.handle("fetch-pbx-extension-info", async (event, ip, token) => pbxApi(ip, token, '/pbx/extension-digital/extension-info'));
+ipcMain.handle("fetch-pbx-extension-available", async (event, ip, token, exten) => pbxApi(ip, token, `/pbx/extension-digital/is-extension-available/${exten}`));
 
 ipcMain.handle("enrich-device", async (event, device, credentials) => enrichDevice(device, credentials));
 

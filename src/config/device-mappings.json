@@ -85,7 +85,18 @@
     "dasscom voip": "Speaker",
     "xi'an jizhong digital communication co.,ltd": "Speaker",
     "xi'an jizhong": "Speaker",
-    "ieee registration authority": "Speaker"
+    "ieee registration authority": "Speaker",
+    "digium": "PBX",
+    "asterisk": "PBX",
+    "freepbx": "PBX",
+    "3cx": "PBX",
+    "avaya": "PBX",
+    "grandstream": "PBX",
+    "yeastar": "PBX",
+    "panasonic": "PBX",
+    "nec": "PBX",
+    "mitel": "PBX",
+    "shoretel": "PBX"
   },
   "patterns": {
     "router|gateway|access point": "Network Device",
@@ -105,7 +116,8 @@
     "sensor|detector|alarm": "Sensor Device",
     "hub|bridge|gateway": "Hub / Gateway",
     "iot.*sensor|sensor.*iot": "IoT Sensor",
-    "ip.*phone|voip.*phone|sip.*phone": "IP Phone"
+    "ip.*phone|voip.*phone|sip.*phone": "IP Phone",
+    "pbx|asterisk|freepbx|3cx|avaya|grandstream|yeastar": "PBX"
   },
   "categories": {
     "networking": "Network Device",

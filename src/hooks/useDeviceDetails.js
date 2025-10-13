@@ -14,7 +14,7 @@ export const useDeviceDetails = () => {
       let info = null;
       const type = (device.type || "").toLowerCase();
 
-      if (type.includes("speaker") || type.includes("extension")) {
+      if (type.includes("speaker"))  {
         try {
           const token = await window.api.speakerLogin(device.ip, "admin", "admin");
           const systemInfo = await window.api.speakerApi(device.ip, token, "/api/get-system-info");
@@ -60,6 +60,36 @@ export const useDeviceDetails = () => {
         } catch (err) {
           console.warn("Netmask fetch failed for speaker:", err.message);
         }
+      } else if (type.includes("pbx")) {
+        // PBX devices
+        try {
+          const token = await window.api.pbxLogin(device.ip, "admin", "admin");
+          console.log("PBX login successful for", device.ip);
+
+          // Fetch common PBX system info
+          try { info.systemTime = await window.api.fetchPbxSystemTime(device.ip, token); } catch (e) { console.warn("PBX systemTime failed:", e.message); }
+          try { info.version = await window.api.fetchPbxVersion(device.ip, token); } catch (e) { console.warn("PBX version failed:", e.message); }
+          try { info.cpu = await window.api.fetchPbxCpu(device.ip, token); } catch (e) { console.warn("PBX cpu failed:", e.message); }
+          try { info.memory = await window.api.fetchPbxMem(device.ip, token); } catch (e) { console.warn("PBX memory failed:", e.message); }
+          try { info.disk = await window.api.fetchPbxDisk(device.ip, token); } catch (e) { console.warn("PBX disk failed:", e.message); }
+          try { info.calls = await window.api.fetchPbxCalls(device.ip, token); } catch (e) { console.warn("PBX calls failed:", e.message); }
+          try { info.extensionStatus = await window.api.fetchPbxExtensionStatus(device.ip, token); } catch (e) { console.warn("PBX extensionStatus failed:", e.message); }
+          try { info.trunkInfo = await window.api.fetchPbxTrunkInfo(device.ip, token); } catch (e) { console.warn("PBX trunkInfo failed:", e.message); }
+
+          // Device-specific endpoints based on model (if available)
+          try {
+            const extensions = await window.api.fetchPbxSearchExtensions(device.ip, token);
+            info.extensions = extensions;
+          } catch (e) { console.warn("PBX extensions failed:", e.message); }
+
+          try {
+            const extensionInfo = await window.api.fetchPbxExtensionInfo(device.ip, token);
+            info.extensionInfo = extensionInfo;
+          } catch (e) { console.warn("PBX extensionInfo failed:", e.message); }
+
+        } catch (err) {
+          console.warn("PBX API fetch failed:", err.message);
+        }
       } else {
         // IP phones / other
         try {
@@ -93,6 +123,6 @@ export const useDeviceDetails = () => {
       setLoading(false);
     }
   };
-
+ 
   return { fetchDetails, loading, error };
 };

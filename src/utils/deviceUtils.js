@@ -56,6 +56,10 @@ export async function detectDeviceTypeDynamic(device, openPorts = []) {
         console.log(`Detected Printer for ${device.ip} (${device.mac || "Unknown"})`);
         return "Printer";
       }
+      if (output.includes("pbx") || output.includes("asterisk") || output.includes("freepbx")) {
+        console.log(`Detected PBX for ${device.ip} (${device.mac || "Unknown"})`);
+        return "PBX";
+      }
 
       // Check for detected services (dynamic from NMAP)
       if (output.includes("sip")) {
@@ -75,6 +79,10 @@ export async function detectDeviceTypeDynamic(device, openPorts = []) {
         return "Router";
       }
       if (output.includes("ssh")) {
+        console.log(`Detected Computer for ${device.ip} (${device.mac || "Unknown"})`);
+        return "Computer";
+      }
+      if (output.includes("ms-wbt-server") || output.includes("terminal services")) {
         console.log(`Detected Computer for ${device.ip} (${device.mac || "Unknown"})`);
         return "Computer";
       }
@@ -100,6 +108,13 @@ export async function detectDeviceTypeDynamic(device, openPorts = []) {
     // Fallback: For Dasscom devices (MAC prefix 8C:1F:64), try login APIs to determine type
     if (macPrefix.startsWith("8C:1F:64")) {
       try {
+        await window.api.pbxLogin(device.ip, "admin", "admin");
+        console.log(`Detected PBX for ${device.ip} (${device.mac || "Unknown"})`);
+        return "PBX";
+      } catch (err) {
+        console.warn(`PBX login failed for ${device.ip}:`, err.message);
+      }
+      try {
         await window.api.speakerLogin(device.ip, "admin", "admin");
         console.log(`Detected Speaker for ${device.ip} (${device.mac || "Unknown"})`);
         return "Speaker";
@@ -114,7 +129,7 @@ export async function detectDeviceTypeDynamic(device, openPorts = []) {
         console.warn(`IP Phone login failed for ${device.ip}:`, err.message);
       }
       console.log(`Detected Unknown for ${device.ip} (${device.mac || "Unknown"})`);
-      return "Unknown"; // Both logins failed
+      return "Unknown"; // All logins failed
     }
   }
   console.log(`Detected Unknown for ${device.ip} (${device.mac || "Unknown"})`);
