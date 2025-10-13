@@ -49,7 +49,7 @@ async function ipPhoneApi(ip, endpoint, method = "GET", body = null) {
 
 
 //login
-async function login(ip, username, password, options = {}) {
+async function login(ip, username = "admin", password = "admin", options = {}) {
   console.log("🚀 ~ login ~ login:", ip, username);
 
   const controller = new AbortController();
@@ -172,68 +172,7 @@ async function speakerApi(ip, token, endpoint, method = "GET", body = null) {
   return responseData;
 }
 
-// PBX APIs
-const pbxTokens = {}; // store per-IP bearer token
-
-async function pbxLogin(ip, username, password) {
-  const url = `http://${ip}/pbx/auth/login`;
-  console.log(`Attempting PBX login to ${url} with username: ${username}`);
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    },
-    body: JSON.stringify({ username, password })
-  });
-
-  console.log(`PBX login response status: ${res.status} ${res.statusText}`);
-
-  if (!res.ok) {
-    const text = await res.text();
-    console.error(`PBX login failed response body: ${text}`);
-    throw new Error(`PBX login failed: ${res.status} ${res.statusText} | ${text}`);
-  }
-
-  const data = await res.json();
-  console.log("PBX login response data:", data);
-  const token = data.token || data.access_token || data.bearer;
-  if (!token) throw new Error("PBX login succeeded but no token returned");
-
-  pbxTokens[ip] = token; // store token for this IP
-  console.log(`PBX login successful, token stored for ${ip}: ${token.substring(0, 20)}...`);
-  return token;
-}
-
-async function pbxApi(ip, token, endpoint, method = "GET", body = null) {
-  const url = `http://${ip}${endpoint}`;
-  console.log(`Making PBX API call to ${url} with bearer token: ${token.substring(0, 20)}...`);
-
-  const headers = {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-    "Authorization": `Bearer ${token}`
-  };
-
-  const res = await fetch(url, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined
-  });
-
-  console.log(`PBX API response status: ${res.status} ${res.statusText}`);
-
-  if (!res.ok) {
-    const text = await res.text();
-    console.error(`PBX API failed response body: ${text}`);
-    throw new Error(`PBX API request failed (${endpoint}): ${res.status} ${res.statusText} | ${text}`);
-  }
-
-  const responseData = await res.json();
-  console.log("PBX API response data:", responseData);
-  return responseData;
-}
+// PBX APIs moved to src/api/pbxClient.js for better organization
  
  
 module.exports = {
@@ -243,9 +182,5 @@ module.exports = {
 
   // Speaker APIs (2 functions)
   speakerApi,        // Unified function for all speaker API calls
-  speakerLogin,      // Speaker login function
-
-  // PBX APIs (2 functions)
-  pbxApi,            // Unified function for all PBX API calls
-  pbxLogin           // PBX login function
+  speakerLogin       // Speaker login function
 };

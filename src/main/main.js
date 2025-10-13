@@ -7,10 +7,19 @@ const {
   login,
   ipPhoneApi,
   speakerLogin,
-  speakerApi,
+  speakerApi
+} = require("../api/dasscomClient");
+const {
   pbxLogin,
   pbxApi
-} = require("../api/dasscomClient");
+} = require("../api/pbxClient");
+const {
+  setCredentials,
+  getCredentials,
+  getAllCredentials,
+  removeCredentials,
+  hasCredentials
+} = require("../utils/credentialsStore");
 const { scanDevices } = require("./arpScanner");
 const { runNmapScan } = require("./nmapScanner");
 const { enrichDevice } = require("../utils/deviceUtils");
@@ -71,15 +80,51 @@ function createWindow() {
 
 // --- IPC handlers ---
 // IP Phone APIs (2 functions like speaker APIs)
-ipcMain.handle("login-device", async (event, ip, username, password, options = {}) => login(ip, username, password, options));
+ipcMain.handle("login-device", async (event, ip, username = "admin", password = "admin", options = {}) => {
+  // Try stored credentials first
+  const storedCreds = getCredentials(ip);
+  if (storedCreds) {
+    try {
+      return await login(ip, storedCreds.username, storedCreds.password, options);
+    } catch (error) {
+      console.warn(`Stored credentials failed for ${ip}, trying provided credentials`);
+    }
+  }
+  // Fallback to provided or default credentials
+  return await login(ip, username, password, options);
+});
 ipcMain.handle("ip-phone-api", async (event, ip, endpoint, method = "GET", body = null) => ipPhoneApi(ip, endpoint, method, body));
 
 // Speaker APIs (2 functions)
-ipcMain.handle("speaker-login", async (event, ip, username = "admin", password = "admin") => speakerLogin(ip, username, password));
+ipcMain.handle("speaker-login", async (event, ip, username = "admin", password = "admin") => {
+  // Try stored credentials first
+  const storedCreds = getCredentials(ip);
+  if (storedCreds) {
+    try {
+      return await speakerLogin(ip, storedCreds.username, storedCreds.password);
+    } catch (error) {
+      console.warn(`Stored credentials failed for ${ip}, trying provided credentials`);
+    }
+  }
+  // Fallback to provided or default credentials
+  return await speakerLogin(ip, username, password);
+});
 ipcMain.handle("speaker-api", async (event, ip, token, endpoint) => speakerApi(ip, token, endpoint));
 
 // PBX APIs (2 functions)
-ipcMain.handle("pbx-login", async (event, ip, username = "admin", password = "admin") => pbxLogin(ip, username, password));
+ipcMain.handle("pbx-login", async (event, ip, username = "admin", password = "admin") => {
+  // Try stored credentials first
+  const storedCreds = getCredentials(ip);
+  if (storedCreds) {
+    try {
+      return await pbxLogin(ip, storedCreds.username, storedCreds.password);
+    } catch (error) {
+      console.warn(`Stored credentials failed for ${ip}, trying provided credentials`);
+    }
+  }
+  // Fallback to provided or default credentials
+  return await pbxLogin(ip, username, password);
+});
 ipcMain.handle("pbx-api", async (event, ip, token, endpoint) => pbxApi(ip, token, endpoint));
 
 // IP Phone API handlers using unified ipPhoneApi function
@@ -108,6 +153,13 @@ ipcMain.handle("fetch-pbx-trunk-info", async (event, ip, token) => pbxApi(ip, to
 ipcMain.handle("fetch-pbx-search-extensions", async (event, ip, token) => pbxApi(ip, token, '/pbx/extension-digital/search-extension-page'));
 ipcMain.handle("fetch-pbx-extension-info", async (event, ip, token) => pbxApi(ip, token, '/pbx/extension-digital/extension-info'));
 ipcMain.handle("fetch-pbx-extension-available", async (event, ip, token, exten) => pbxApi(ip, token, `/pbx/extension-digital/is-extension-available/${exten}`));
+
+// Credentials management
+ipcMain.handle("set-device-credentials", async (event, ip, username, password) => setCredentials(ip, username, password));
+ipcMain.handle("get-device-credentials", async (event, ip) => getCredentials(ip));
+ipcMain.handle("get-all-device-credentials", async (event) => getAllCredentials());
+ipcMain.handle("remove-device-credentials", async (event, ip) => removeCredentials(ip));
+ipcMain.handle("has-device-credentials", async (event, ip) => hasCredentials(ip));
 
 ipcMain.handle("enrich-device", async (event, device, credentials) => enrichDevice(device, credentials));
 

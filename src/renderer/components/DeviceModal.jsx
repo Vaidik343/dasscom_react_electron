@@ -1,5 +1,7 @@
 import React from "react";
 import "../style/DeviceModal.css";
+import noApiData from "../../assets/icons/clipboard2-pulse-fill.svg";
+
 import { useDeviceContext } from "../context/DeviceContext";
 
 export default function DeviceModal() {
@@ -95,7 +97,19 @@ export default function DeviceModal() {
 
   const renderAdvancedData = (data) => {
     if (!data || Object.keys(data).length === 0) {
-      return <p className="text-center">No API data available</p>;
+      return <p className="text-center">
+         <img
+                      src={noApiData}
+                      alt="redirect icon"
+                      style={{
+                        width: 17,
+                        height: 15,
+                        marginLeft: 5,
+                        verticalAlign: "middle",
+                      }}
+                    />
+        
+        No API data available</p>;
     }
 
     // Dynamically render whatever API data is available
@@ -174,10 +188,10 @@ export default function DeviceModal() {
       <div className="modal-dialog modal-xl">
         <div className="modal-content" id="deviceModal">
           <div className="modal-header">
-            <h5 className="modal-title">Device Details - {device.ip}</h5>
+            <h5 className="modal-title ">Device Details - {device.ip}</h5>
             <button
               type="button"
-              className="btn-close btn-close-white"
+              className="btn-close "
               onClick={handleClose}
               aria-label="Close"
             ></button>
@@ -185,7 +199,7 @@ export default function DeviceModal() {
           <div className="modal-body overflow-auto" id="deviceModalBody">
             <div className="row">
               <div className="col-md-12 mb-3">
-                <h4 className="text-center">{device.ip}</h4>
+                <h4 className="text-center text-dark">{device.ip}</h4>
                 <hr />
               </div>
 
@@ -193,7 +207,7 @@ export default function DeviceModal() {
               <div className="col-md-12 mb-4">
                 <div className="card">
                   <div className="card-header text-white">
-                    <h6 className="mb-0">📋 Basic Information</h6>
+                    <h5 className="mb-0 text-dark" >📋 Basic Information</h5>
                   </div>
                   <div className="card-body">
                     <div className="row">
@@ -222,7 +236,7 @@ export default function DeviceModal() {
               </div>
 
               {/* Action Buttons - Only for IP Phone devices */}
-              {device.type === "IP Phone" && (
+              {/* {device.type === "IP Phone" && (
                 <div className="col-md-12 mt-4">
                   <h5 className="text-center mb-3">Device Actions</h5>
                   <div className="row justify-content-center">
@@ -244,7 +258,7 @@ export default function DeviceModal() {
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         </div>

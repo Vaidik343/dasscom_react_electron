@@ -40,28 +40,25 @@ tr {
 }
 .ip-cell:hover {
   color: rgb(44, 44, 215) !important;
-  text-decoration: underline;
+  text-decoration: underline;                                                                           
   cursor: pointer;
 } /* Enlarged cards with soft shadows and round borders */
 .card {
-  background:#7040eb;
+  /* background:#7040eb; */
   
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 1rem;
-  color: #fff;
+  /* color: #fff; */
   transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.4s;
   backdrop-filter: blur(20px);
 }
 .card:hover {
-  transform: scale(1.03);
+  transform: scale(1.05);
   box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
-  background-color: #5b42f3;
+  /* background-color: #5b42f3; */
 
 }
-.card-title,
-.card-text {
-  color: white !important;
-}
+
 .card-text {
   font-size: 0.95rem;
 }
@@ -315,7 +312,7 @@ td{
 
 
 
-
+/* 
 .e-card {
   margin: 40px auto;
   background: transparent;
@@ -407,7 +404,7 @@ td{
    100% {
      transform: rotate(360deg);
    }
- }
+ } */
 
 /* Modal Glassmorphism Styles */
 .modal {
@@ -420,7 +417,7 @@ td{
 
 /* Modal Content - Glassmorphism Design */
 #deviceModal .modal-content {
-  background: rgba(255, 255, 255, 0.3) !important;
+  /* background: rgba(255, 255, 255, 0.3) !important; */
   backdrop-filter: blur(15px) !important;
   -webkit-backdrop-filter: blur(15px) !important;
   border-radius: 15px !important;
@@ -432,12 +429,12 @@ td{
 /* Modal Header */
 .modal-header {
   border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: #9fc7cb
 }
 
 .modal-title {
-  color: #fff !important;
-  font-weight: bold;
+  /* color: #fff !important; */
+  /* font-weight: ; */
 }
 
 /* Close Button */
@@ -449,13 +446,13 @@ td{
 .modal-body {
   max-height: 70vh;
   overflow-y: auto;
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: #ebf2f5 !important;
   backdrop-filter: blur(15px) !important;
 }
 
 /* Card Headers */
 .card-header {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: #ffff !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 1rem 1rem 0 0 !important;
 }
@@ -465,11 +462,9 @@ td{
 }
 
 /* Text Colors */
-.modal-title,
-.card-title,
-.card-text {
+/* .modal-title{
   color: white !important;
-}
+} */
 
 /* Badges */
 .badge {

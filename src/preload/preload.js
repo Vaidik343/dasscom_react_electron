@@ -12,6 +12,13 @@ contextBridge.exposeInMainWorld("api", {
   // PBX APIs (2 functions)
   pbxLogin: (ip, user, pass) => ipcRenderer.invoke("pbx-login", ip, user, pass),
   pbxApi: (ip, token, endpoint) => ipcRenderer.invoke("pbx-api", ip, token, endpoint),
+
+  // Credentials management
+  setDeviceCredentials: (ip, username, password) => ipcRenderer.invoke("set-device-credentials", ip, username, password),
+  getDeviceCredentials: (ip) => ipcRenderer.invoke("get-device-credentials", ip),
+  getAllDeviceCredentials: () => ipcRenderer.invoke("get-all-device-credentials"),
+  removeDeviceCredentials: (ip) => ipcRenderer.invoke("remove-device-credentials", ip),
+  hasDeviceCredentials: (ip) => ipcRenderer.invoke("has-device-credentials", ip),
   
   // Utility functions
   enrichDevice: (device, credentials) => ipcRenderer.invoke("enrich-device", device, credentials),
