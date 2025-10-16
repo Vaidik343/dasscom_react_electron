@@ -12,6 +12,34 @@ const path = require("path");
 const fs = require("fs");
 const log = require('electron-log');
 
+// Check if a device is online by pinging it
+async function checkOnlineStatus(ipAddr) {
+  return new Promise((resolve) => {
+    const platform = os.platform();
+    let pingCmd;
+
+    if (platform === 'win32') {
+      pingCmd = `ping -n 1 -w 2000 ${ipAddr}`;
+    } else {
+      pingCmd = `ping -c 1 -W 2 ${ipAddr}`;
+    }
+
+    exec(pingCmd, (error, stdout, stderr) => {
+      if (error) {
+        console.log(`Ping failed for ${ipAddr}: ${error.message}`);
+        resolve(false);
+      } else {
+        const output = stdout.toLowerCase();
+        if (platform === 'win32') {
+          resolve(output.includes('reply from') || output.includes('bytes='));
+        } else {
+          resolve(output.includes('1 packets transmitted, 1 received'));
+        }
+      }
+    });
+  });
+}
+
 // Get all local network subnets
 function getLocalNetworkSubnets() {
   const interfaces = os.networkInterfaces();
@@ -332,11 +360,17 @@ async function scanDevices({ useSubnetScan = false, ipAddr, netmask, useNmap = t
     // In debug mode, return all devices for testing
     if (debugMode) {
       console.log('DEBUG MODE: Returning all devices instead of just Dasscom devices');
-      const enrichedDevices = await Promise.all(devices.map(enrichDevice));
+      const enrichedDevices = await Promise.all(devices.map(async (device) => {
+        const online = await checkOnlineStatus(device.ip);
+        return enrichDevice({ ...device, online });
+      }));
       return enrichedDevices;
     }
 
-    const enrichedDevices = await Promise.all(dasscomDevices.map(enrichDevice));
+    const enrichedDevices = await Promise.all(dasscomDevices.map(async (device) => {
+      const online = await checkOnlineStatus(device.ip);
+      return enrichDevice({ ...device, online });
+    }));
 
     return enrichedDevices;
   } catch (error) {

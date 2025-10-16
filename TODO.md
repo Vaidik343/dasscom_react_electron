@@ -1,6 +1,10 @@
-# TODO: Fix DeviceCard Display to Rows (Vertical Stacking)
+# TODO: Add Online/Offline Status to Devices
 
-- [x] Update DeviceCard.jsx: Change Bootstrap class from "col-md-4 mb-4" to "col-12 mb-4" for full-width vertical stacking.
-- [x] Update DeviceCard.css: Change .cardDesign width from 65dvw to 100% to allow natural full-width layout.
-- [x] Update DeviceList.jsx: Add "d-flex flex-column" to card-container class for explicit vertical direction.
-- [ ] Test changes: Restart dev server and verify cards stack vertically on all screen sizes.
+## Pending Tasks
+- [x] Add checkOnlineStatus function in src/main/arpScanner.js to ping each device and set online status.
+- [x] Update enrichDevice in src/utils/deviceUtils.js to include online field.
+- [x] Modify src/renderer/components/DeviceCard.jsx to show online/offline indicator (e.g., colored border or icon).
+- [x] Modify src/renderer/components/DeviceTable.jsx to show online status in a new column or via styling.
+- [x] Test on Windows (ping command syntax) and ensure cross-platform compatibility.
+- [x] Handle ping timeouts and errors gracefully.
+- [x] Update UI to filter or highlight offline devices if needed.

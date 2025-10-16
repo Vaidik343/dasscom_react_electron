@@ -212,7 +212,7 @@ export default function DeviceModal() {
                   <div className="card-body">
                     <div className="row">
                       <div className="col-md-6">
-                        <p><strong>Status:</strong> <span className={`badge ${device.alive ? "bg-success" : "bg-danger"}`}>{device.alive ? "Online" : "Offline"}</span></p>
+                        <p><strong>Status:</strong> <span className={`badge ${device.online ? "bg-success" : "bg-danger"}`}>{device.online ? "Online" : "Offline"}</span></p>
                         <p><strong>Hostname:</strong> {device.hostname || "Unknown"}</p>
                         <p><strong>Vendor:</strong> {device.vendor || "Unknown"}</p>
                       </div>

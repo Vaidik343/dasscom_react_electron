@@ -41,27 +41,54 @@ export default function Controls() {
   return (
     <>
       <div className="controls d-flex p-2 mx-4 gap-4">
-        <input
-          type="text"
+     <div className="position-relative" style={{ width: "35%"  }}>
+  <input
+    type="text"
+    className="form-control "
+    placeholder="Search IP/MAC/Hostname..."
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+  />
+  {searchQuery && (
+    <button
+      type="button"
+      className="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-1"
+      onClick={() => setSearchQuery("")}
+      style={{ zIndex: 2 }}
+    >
+      ✕
+    </button>
+  )}
+</div>
 
-          placeholder="Search IP/MAC/Hostname..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-
-        <select  className=""  value={deviceType} onChange={(e) => setDeviceType(e.target.value)}>
+       <div className="selectDevice" style={{ width: "10%"  }}>
+        <select  className="form-select"  value={deviceType} onChange={(e) => setDeviceType(e.target.value)}>
           <option value="">All Types</option>
           {uniqueTypes.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
+  </div>
 
-        <button onClick={() => setViewMode("card")} className={viewMode === "card " ? "active " : ""} >Card View</button>
-        <button onClick={() => setViewMode("table")} className={viewMode === "table" ? "active" : ""}>Table View</button>
 
-        <button onClick={() => scanDevices({ useNmap: true })} disabled={scanning}>
+   <button
+  onClick={() => setViewMode("card")}
+  className={`btn btn-outline-success ${viewMode === "card" ? "active" : ""}`}
+>
+  Card
+</button>
+
+<button
+  onClick={() => setViewMode("table")}
+  className={`btn btn-outline-success ${viewMode === "table" ? "active" : ""}`}
+>
+  Table
+</button>
+  
+
+        <button onClick={() => scanDevices({ useNmap: true })} disabled={scanning}  className="btn btn btn-primary">
           {scanning ? "Scanning..." : "Quick Scan"}
         </button>
 
-        <button onClick={() => setShowCredentialsManager(true)}>
+        <button onClick={() => setShowCredentialsManager(true)} className="btn btn-primary">
           Manage Credentials
         </button>
 

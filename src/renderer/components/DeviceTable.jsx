@@ -1,4 +1,5 @@
 import React from "react";
+import "../style/DeviceTable.css";
 
 export default function DeviceTable({ devices, onRowClick, onIpClick }) {
   return (
@@ -9,6 +10,7 @@ export default function DeviceTable({ devices, onRowClick, onIpClick }) {
             <th>IP Address</th>
             <th>MAC Address</th>
             <th>Type</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -25,6 +27,16 @@ export default function DeviceTable({ devices, onRowClick, onIpClick }) {
               </td>
               <td>{device.mac || "Unknown"}</td>
               <td>{device.type || "Unknown"}</td>
+              <td>
+                <span
+                  style={{
+                    color: device.online ? '#28a745' : '#dc3545',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {device.online ? 'Online' : 'Offline'}
+                </span>
+              </td>
             </tr>
           ))}
         </tbody>

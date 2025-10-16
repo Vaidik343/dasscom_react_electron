@@ -143,12 +143,14 @@ export async function enrichDevice(device) {
   const mac = normalizeMac(device.mac);
   const vendor = device.vendor || "Unknown";
   const type = device.type || "Unknown";
+  const online = device.online !== undefined ? device.online : true; // Default to true if not provided
 
   return {
     ...device,
     mac,
     vendor,
     type,
+    online,
   };
 }
 

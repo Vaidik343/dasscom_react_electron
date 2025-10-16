@@ -3,18 +3,40 @@ import webViewArrow from "../../assets/icons/arrow-up-right-from-square-solid-fu
 import "bootstrap/dist/css/bootstrap.min.css";
 import '../style/DeviceCard.css'
 export default function DeviceCard({ device, onClick, onContextMenu }) {
+  const onlineStatus = device.online ? "online" : "offline";
+  const borderColor = device.online ? "#28a745" : "#dc3545"; // Green for online, red for offline
+
   return (
-    
+
     <div className="DeviceCard col-3 mb-4">
       <div
         className="card shadow-sm border-0"
-        style={{ borderRadius: "12px", cursor: "pointer" }}
+        style={{
+          borderRadius: "12px",
+          cursor: "pointer",
+          border: `2px solid ${borderColor}`,
+          position: "relative"
+        }}
         onClick={() => onClick(device)}
         onContextMenu={(e) => {
           e.preventDefault();
           onContextMenu && onContextMenu(device, e);
         }}
       >
+        <div
+          className="online-indicator"
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            width: "12px",
+            height: "12px",
+            borderRadius: "50%",
+            backgroundColor: device.online ? "#28a745" : "#dc3545",
+            border: "2px solid white"
+          }}
+          title={onlineStatus}
+        ></div>
         <div className="card-body cardDesign">
           <h6
             className="card-title  mb-1"
@@ -23,16 +45,18 @@ export default function DeviceCard({ device, onClick, onContextMenu }) {
               e.stopPropagation();
               onClick(device);
             }}
-            style={{ cursor: "pointer" }}
+            style={{ cursor: "pointer" , color:"#0c5460" }}
           >
             <strong>IP:</strong> {device.ip}
           </h6>
 
           <p className="card-text mb-1">
-            <strong>MAC:</strong> {device.mac || "Unknown"}
+            <strong style={{  color:"#0c5460" }}>MAC: </strong> {device.mac || "Unknown"}
+                
           </p>
           <p className="card-text mb-1">
-            <strong>Type:</strong> {device.type || "Unknown"}
+            <strong   style={{  color:"#0c5460" }}>Type:</strong> {device.type || "Unknown"}
+              
           </p>
               <hr />
           <p
