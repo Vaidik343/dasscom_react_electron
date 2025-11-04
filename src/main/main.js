@@ -2,6 +2,9 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const { dialog } = require("electron");
 const exportToExcel = require("../utils/exportToExcel");
+
+
+
 const path = require("path");
 const {
   login,
@@ -27,9 +30,15 @@ const { enrichDevice } = require("../utils/deviceUtils");
 const isDev = process.env.NODE_ENV === "development";
 
 function createWindow() {
+  // Set icon path for both dev and production
+  const iconPath = isDev
+    ? path.join(app.getAppPath(), "public/wifi.ico")
+    : path.join(process.resourcesPath, "wifi.ico");
+
   const win = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    width: 1500,
+    height: 650,
+    icon: iconPath,
   webPreferences: {
       contextIsolation: true,
       preload: path.join(app.getAppPath(), "src", "preload", "preload.js"),
@@ -40,7 +49,7 @@ function createWindow() {
 
   if (isDev) {
     win.loadURL("http://localhost:5173");
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools(); // Commented out to prevent console from opening automatically
   } else {
     // Production: use path inside app.asar
     const indexPath = path.join(app.getAppPath(), "dist", "index.html");

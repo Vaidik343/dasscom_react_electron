@@ -49,7 +49,8 @@
       "src/**",
       "preload/**",
       "api/**",
-      "utils/**"
+      "utils/**",
+      "public/**"
     ],
     "asarUnpack": [
       "binaries/**"
@@ -58,10 +59,15 @@
       {
         "from": "binaries",
         "to": "binaries"
+      },
+      {
+        "from": "public/wifi.ico",
+        "to": "wifi.ico"
       }
     ],
     "npmRebuild": false,
     "win": {
+      "icon": "public/wifi.ico",
       "target": [
         {
           "target": "nsis",
