@@ -9,6 +9,7 @@ export const useDeviceScan = () => {
 
   const scanDevices = useCallback(async (options = {}) => {
     setLoading(true);
+    setIsLoading(true);
     setError(null);
     try {
       if (!window.api || !window.api.scanDevices) {
@@ -41,8 +42,9 @@ export const useDeviceScan = () => {
       throw err;
     } finally {
       setLoading(false);
+      setIsLoading(false);
     }
-  }, [setDevices]);
+  }, [setDevices, setIsLoading]);
 
   return { scanDevices, loading, error };
 };

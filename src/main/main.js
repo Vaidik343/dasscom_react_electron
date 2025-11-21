@@ -48,7 +48,7 @@ function createWindow() {
   });
 
   if (isDev) {
-    win.loadURL("http://localhost:5173");
+    win.loadURL("http://localhost:4001");
     // win.webContents.openDevTools(); // Commented out to prevent console from opening automatically
   } else {
     // Production: use path inside app.asar

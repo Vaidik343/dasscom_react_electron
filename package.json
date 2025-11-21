@@ -7,7 +7,7 @@
     "build": "vite build",
     "preview": "vite preview --port 5173",
     "electron": "cross-env NODE_ENV=development electron .",
-    "electron-dev": "concurrently -k \"npm run dev\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development npm run electron\"",
+    "electron-dev": "concurrently -k \"npm run dev\" \"wait-on http://localhost:4001 && cross-env NODE_ENV=development npm run electron\"",
     "dist": "electron-builder"
   },
   "dependencies": {
@@ -44,6 +44,9 @@
     "wait-on": "^9.0.1"
   },
   "build": {
+    "directories": {
+    "buildResources": "public"
+  },
     "files": [
       "dist/**",
       "src/**",

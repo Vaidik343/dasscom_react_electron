@@ -1,10 +1,7 @@
-# TODO: Add Online/Offline Status to Devices
+# TODO: Change Vite Dev Server Port to 4001
 
-## Pending Tasks
-- [x] Add checkOnlineStatus function in src/main/arpScanner.js to ping each device and set online status.
-- [x] Update enrichDevice in src/utils/deviceUtils.js to include online field.
-- [x] Modify src/renderer/components/DeviceCard.jsx to show online/offline indicator (e.g., colored border or icon).
-- [x] Modify src/renderer/components/DeviceTable.jsx to show online status in a new column or via styling.
-- [x] Test on Windows (ping command syntax) and ensure cross-platform compatibility.
-- [x] Handle ping timeouts and errors gracefully.
-- [x] Update UI to filter or highlight offline devices if needed.
+- [x] Update vite.config.js to set server.port: 4001
+- [x] Update src/main/main.js to loadURL("http://localhost:4001")
+- [x] Update package.json "electron-dev" script to wait-on http://localhost:4001
+- [x] Update CSP in index.html to allow http://localhost:4001
+- [x] Update CSP in renderer/index.html to allow http://localhost:4001

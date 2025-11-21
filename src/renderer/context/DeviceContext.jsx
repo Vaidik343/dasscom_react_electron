@@ -9,6 +9,7 @@ export const DeviceProvider = ({ children }) => {
   const [viewMode, setViewMode] = useState(localStorage.getItem("viewMode") || "card");
   const [searchQuery, setSearchQuery] = useState("");
   const [deviceType, setDeviceType] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const value = {
     devices,
@@ -20,7 +21,9 @@ export const DeviceProvider = ({ children }) => {
     searchQuery,
     setSearchQuery,
     deviceType,
-    setDeviceType
+    setDeviceType,
+    isLoading,
+    setIsLoading
   };
 
   return <DeviceContext.Provider value={value}>{children}</DeviceContext.Provider>;
