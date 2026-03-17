@@ -13,7 +13,7 @@ export default function App() {
         {/* <LogsPanel /> */}
         <DeviceList />
         <DeviceModal />
-           <GlobalLoaderOverlay />
+        <GlobalLoaderOverlay />
       </div>
     </DeviceProvider>
   );

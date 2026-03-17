@@ -1,5 +1,5 @@
 // src/main/main.js
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 const { dialog } = require("electron");
 const exportToExcel = require("../utils/exportToExcel");
 const gotLock = app.requestSingleInstanceLock();
@@ -25,6 +25,7 @@ const {
 } = require("../utils/credentialsStore");
 const { scanDevices } = require("./arpScanner");
 const { runNmapScan } = require("./nmapScanner");
+const { runNativeScan } = require("./nativeScanner");
 const { enrichDevice } = require("../utils/deviceUtils");
 
 const isDev = process.env.NODE_ENV === "development";
@@ -39,7 +40,7 @@ function createWindow() {
     width: 1500,
     height: 650,
     icon: iconPath,
-  webPreferences: {
+    webPreferences: {
       contextIsolation: true,
       preload: path.join(app.getAppPath(), "src", "preload", "preload.js"),
       webSecurity: false, // ✅ allow loading local files inside ASAR
@@ -70,12 +71,12 @@ function createWindow() {
   console.log = (...args) => {
     originalLog(...args);
     try {
-      win.webContents.send( 
+      win.webContents.send(
         "console-log",
         args.map(a => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ")
       );
-    } catch (e) {}
-  }; 
+    } catch (e) { }
+  };
   console.error = (...args) => {
     originalError(...args);
     try {
@@ -83,8 +84,130 @@ function createWindow() {
         "console-log",
         "ERROR: " + args.map(a => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ")
       );
-    } catch (e) {}
+    } catch (e) { }
   };
+
+  createMenu(win);
+}
+
+function createMenu(win) {
+  const isMac = process.platform === 'darwin';
+
+  const template = [
+    ...(isMac ? [{
+      label: app.name,
+      submenu: [
+        { role: 'about' },
+        { type: 'separator' },
+        { role: 'services' },
+        { type: 'separator' },
+        { role: 'hide' },
+        { role: 'hideOthers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
+    }] : []),
+    {
+      label: 'File',
+      submenu: [
+        isMac ? { role: 'close' } : { role: 'quit' }
+      ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        ...(isMac ? [
+          { role: 'pasteAndMatchStyle' },
+          { role: 'delete' },
+          { role: 'selectAll' },
+          { type: 'separator' },
+          {
+            label: 'Speech',
+            submenu: [
+              { role: 'startSpeaking' },
+              { role: 'stopSpeaking' }
+            ]
+          }
+        ] : [
+          { role: 'delete' },
+          { type: 'separator' },
+          { role: 'selectAll' }
+        ])
+      ]
+    },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+        { type: 'separator' },
+        { role: 'resetZoom' },
+        { role: 'zoomIn' },
+        { role: 'zoomOut' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' }
+      ]
+    },
+    {
+      label: 'Scan',
+      submenu: [
+        {
+          label: 'Default Mode',
+          type: 'radio',
+          checked: true,
+          click: () => {
+            win.webContents.send('update-scan-mode', 'lite');
+          }
+        },
+        {
+          label: 'Nmap Mode',
+          type: 'radio',
+          checked: false,
+          click: () => {
+            win.webContents.send('update-scan-mode', 'enterprise');
+          }
+        }
+      ]
+    },
+    {
+      label: 'Window',
+      submenu: [
+        { role: 'minimize' },
+        { role: 'zoom' },
+        ...(isMac ? [
+          { type: 'separator' },
+          { role: 'front' },
+          { type: 'separator' },
+          { role: 'window' }
+        ] : [
+          { role: 'close' }
+        ])
+      ]
+    },
+    {
+      role: 'help',
+      submenu: [
+        {
+          label: 'About Dasscom',
+          click: async () => {
+            const { shell } = require('electron');
+            await shell.openExternal('https://dasscom.com');
+          }
+        }
+      ]
+    }
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
 }
 
 // --- IPC handlers ---
@@ -220,9 +343,19 @@ ipcMain.handle("nmap-scan", async (event, ip) => {
     return null;
   }
 });
-app.whenReady().then(createWindow);
 
-
+// ── NATIVE SCANNER (No Nmap / No Npcap / No License) ──
+ipcMain.handle("native-scan-devices", async (event, options = {}) => {
+  console.log("🌿 IPC: native-scan-devices called with options:", options);
+  try {
+    const devices = await runNativeScan(options);
+    console.log(`🌿 IPC: native scan completed, found ${devices.length} devices`);
+    return devices;
+  } catch (error) {
+    console.error("🌿 IPC: native scan error:", error);
+    throw error;
+  }
+});
 
 if (!gotLock) {
   app.quit();

@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld("api", {
   // Utility functions
   enrichDevice: (device, credentials) => ipcRenderer.invoke("enrich-device", device, credentials),
   scanDevices: (options = {}) => ipcRenderer.invoke("scan-devices", options),
+  nativeScanDevices: (options = {}) => ipcRenderer.invoke("native-scan-devices", options),
 
   // Legacy IP phone functions (for backward compatibility)
   fetchSystemInfo: (ip, token) => ipcRenderer.invoke("fetch-system-info", ip, token),
@@ -54,6 +55,9 @@ contextBridge.exposeInMainWorld("api", {
 
   receive: (channel, func) => {
     ipcRenderer.on(channel, (event, ...args) => func(...args));
+  },
+  onUpdateScanMode: (callback) => {
+    ipcRenderer.on('update-scan-mode', (event, mode) => callback(mode));
   },
 });
   
