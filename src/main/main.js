@@ -27,6 +27,7 @@ const { scanDevices } = require("./arpScanner");
 const { runNmapScan } = require("./nmapScanner");
 const { runNativeScan } = require("./nativeScanner");
 const { enrichDevice } = require("../utils/deviceUtils");
+const { initializeCloudDevice, stopCloudMqttConnection, cloudApiGet, getCloudSystemInfo } = require("../api/cloudClient");
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -294,6 +295,35 @@ ipcMain.handle("remove-device-credentials", async (event, ip) => removeCredentia
 ipcMain.handle("has-device-credentials", async (event, ip) => hasCredentials(ip));
 
 ipcMain.handle("enrich-device", async (event, device, credentials) => enrichDevice(device, credentials));
+
+// --- Cloud Platform Setup (MQTT) ---
+ipcMain.handle("initialize-cloud-device", async (event, sn, mac, cloudDomain) => {
+  console.log(`🚀 IPC: initialize-cloud-device called for SN: ${sn}`);
+  try {
+    // We pass event.sender.send down to the cloudClient
+    // This allows the cloud client to instantly 'push' MQTT data to the React UI
+    const ipcSender = (channel, data) => event.sender.send(channel, data);
+    const result = await initializeCloudDevice(sn, mac, cloudDomain, ipcSender);
+    return result;
+  } catch (err) {
+    console.error(`🚀 IPC: initialize-cloud-device error:`, err);
+    return { success: false, message: err.message };
+  }
+});
+
+ipcMain.handle("stop-cloud-device", async (event, sn) => {
+  stopCloudMqttConnection(sn);
+  return { success: true };
+});
+
+ipcMain.handle("fetch-cloud-system-info", async (event, sn) => {
+  return await getCloudSystemInfo(sn);
+});
+
+ipcMain.handle("cloud-api-get", async (event, sn, endpoint) => {
+  return await cloudApiGet(sn, endpoint);
+});
+// -----------------------------------
 
 ipcMain.handle("scan-devices", async (event, options = {}) => {
   console.log("🚀 IPC: scan-devices called with options:", options);

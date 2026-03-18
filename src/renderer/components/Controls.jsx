@@ -3,6 +3,7 @@ import { useDeviceContext } from "../context/DeviceContext";
 import { useDeviceScan } from "../../hooks/useDeviceScan";
 import ExportButton from "./ExportButton";
 import CredentialsManager from "./CredentialsManager";
+import CloudDeviceModal from "./CloudDeviceModal";
 
 export default function Controls() {
   const {
@@ -14,6 +15,7 @@ export default function Controls() {
 
   const { scanDevices, loading: scanning } = useDeviceScan();
   const [showCredentialsManager, setShowCredentialsManager] = useState(false);
+  const [showCloudModal, setShowCloudModal] = useState(false);
 
   // ── Scan Mode State: 'enterprise' (Nmap) | 'lite' (Native Node.js) ──
   const [scanMode, setScanMode] = useState("lite");
@@ -136,12 +138,26 @@ export default function Controls() {
           Manage Credentials
         </button>
 
+        {/* Cloud Connect */}
+        <button
+          onClick={() => setShowCloudModal(true)}
+          className="btn btn-info text-white"
+          style={{ display: "flex", alignItems: "center", gap: "6px" }}
+        >
+          ☁️ Connect Cloud
+        </button>
+
         <ExportButton />
       </div>
 
       <CredentialsManager
         show={showCredentialsManager}
         onHide={() => setShowCredentialsManager(false)}
+      />
+
+      <CloudDeviceModal 
+        show={showCloudModal} 
+        onHide={() => setShowCloudModal(false)} 
       />
     </>
   );

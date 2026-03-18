@@ -23,6 +23,15 @@ contextBridge.exposeInMainWorld("api", {
   // Utility functions
   enrichDevice: (device, credentials) => ipcRenderer.invoke("enrich-device", device, credentials),
   scanDevices: (options = {}) => ipcRenderer.invoke("scan-devices", options),
+  
+  // Cloud Platform Functions
+  initializeCloudDevice: (sn, mac, cloudDomain) => ipcRenderer.invoke("initialize-cloud-device", sn, mac, cloudDomain),
+  stopCloudDevice: (sn) => ipcRenderer.invoke("stop-cloud-device", sn),
+  fetchCloudSystemInfo: (sn) => ipcRenderer.invoke("fetch-cloud-system-info", sn),
+  cloudApiGet: (sn, endpoint) => ipcRenderer.invoke("cloud-api-get", sn, endpoint),
+  onCloudDeviceUpdate: (callback) => {
+    ipcRenderer.on("cloud-device-update", (event, data) => callback(data));
+  },
   nativeScanDevices: (options = {}) => ipcRenderer.invoke("native-scan-devices", options),
 
   // Legacy IP phone functions (for backward compatibility)
