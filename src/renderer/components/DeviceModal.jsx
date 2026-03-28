@@ -149,7 +149,18 @@ export default function DeviceModal() {
         extensionStatus: "👥",
         trunkInfo: "🌐",
         extensions: "📋",
-        extensionInfo: "👤"
+        extensionInfo: "👤",
+        // WiFi-specific APIs
+        deviceBasic: "📑",
+        deviceSystem: "💻",
+        wireless: "📡",
+        wirelessParams: "📊",
+        userList: "👥",
+        timeoutInfo: "⏱️",
+        configMgmt: "⚙️",
+        scheduledRestart: "🔄",
+        systemLogInfo: "📝",
+        systemLogFiles: "📂"
       };
 
       // Generate display name from key

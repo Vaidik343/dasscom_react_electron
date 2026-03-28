@@ -17,6 +17,10 @@ const {
   pbxApi
 } = require("../api/pbxClient");
 const {
+  wifiLogin,
+  wifiApi
+} = require("../api/wifiClient");
+const {
   setCredentials,
   getCredentials,
   getAllCredentials,
@@ -259,6 +263,39 @@ ipcMain.handle("pbx-login", async (event, ip, username = "admin", password = "ad
   return await pbxLogin(ip, username, password);
 });
 ipcMain.handle("pbx-api", async (event, ip, token, endpoint) => pbxApi(ip, token, endpoint));
+
+// WiFi/Wireless Access Point APIs
+ipcMain.handle("wifi-login", async (event, ip, username = "admin", password = "admin") => {
+  const storedCreds = getCredentials(ip);
+  if (storedCreds) {
+    try {
+      return await wifiLogin(ip, storedCreds.username, storedCreds.password);
+    } catch (error) {
+      console.warn(`[WiFi] Stored credentials failed for ${ip}, trying provided credentials`);
+    }
+  }
+  return await wifiLogin(ip, username, password);
+});
+ipcMain.handle("wifi-api", async (event, ip, cookie, endpoint, funname, action, body) => wifiApi(ip, cookie, endpoint, funname, action, body));
+
+// WiFi Wireless endpoints
+ipcMain.handle("fetch-wifi-wireless-info",         async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/wireless", 2, 1));
+ipcMain.handle("fetch-wifi-timeout-info",           async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/wireless", 2, 2));
+ipcMain.handle("fetch-wifi-user-list",              async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/wireless", 2, 3));
+ipcMain.handle("fetch-wifi-wireless-params",        async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/wireless", 2, 4));
+
+// WiFi System Log endpoints
+ipcMain.handle("fetch-wifi-system-log-info",        async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_log", 11, 1));
+ipcMain.handle("fetch-wifi-system-log-files",       async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_log", 11, 2));
+
+// WiFi Config & Settings endpoints
+ipcMain.handle("fetch-wifi-config-management",     async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 12, 1));
+ipcMain.handle("fetch-wifi-language-settings",     async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 12, 2));
+ipcMain.handle("fetch-wifi-scheduled-restart",     async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 12, 3));
+
+// WiFi Device Info endpoints
+ipcMain.handle("fetch-wifi-device-system-info",    async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 10, 1));
+ipcMain.handle("fetch-wifi-device-basic-info",     async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 10, 2));
 
 // IP Phone API handlers using unified ipPhoneApi function
 ipcMain.handle("fetch-system-info", async (event, ip, token) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=version'));

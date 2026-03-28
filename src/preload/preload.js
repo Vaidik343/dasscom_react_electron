@@ -13,6 +13,29 @@ contextBridge.exposeInMainWorld("api", {
   pbxLogin: (ip, user, pass) => ipcRenderer.invoke("pbx-login", ip, user, pass),
   pbxApi: (ip, token, endpoint) => ipcRenderer.invoke("pbx-api", ip, token, endpoint),
 
+  // WiFi/Wireless Access Point APIs
+  wifiLogin: (ip, user, pass) => ipcRenderer.invoke("wifi-login", ip, user, pass),
+  wifiApi: (ip, cookie, endpoint, funname, action, body) => ipcRenderer.invoke("wifi-api", ip, cookie, endpoint, funname, action, body),
+
+  // WiFi Wireless endpoints
+  fetchWifiWirelessInfo:        (ip, cookie) => ipcRenderer.invoke("fetch-wifi-wireless-info", ip, cookie),
+  fetchWifiTimeoutInfo:         (ip, cookie) => ipcRenderer.invoke("fetch-wifi-timeout-info", ip, cookie),
+  fetchWifiUserList:            (ip, cookie) => ipcRenderer.invoke("fetch-wifi-user-list", ip, cookie),
+  fetchWifiWirelessParams:      (ip, cookie) => ipcRenderer.invoke("fetch-wifi-wireless-params", ip, cookie),
+
+  // WiFi System Log endpoints
+  fetchWifiSystemLogInfo:       (ip, cookie) => ipcRenderer.invoke("fetch-wifi-system-log-info", ip, cookie),
+  fetchWifiSystemLogFiles:      (ip, cookie) => ipcRenderer.invoke("fetch-wifi-system-log-files", ip, cookie),
+
+  // WiFi Config & Settings endpoints
+  fetchWifiConfigManagement:    (ip, cookie) => ipcRenderer.invoke("fetch-wifi-config-management", ip, cookie),
+  fetchWifiLanguageSettings:    (ip, cookie) => ipcRenderer.invoke("fetch-wifi-language-settings", ip, cookie),
+  fetchWifiScheduledRestart:    (ip, cookie) => ipcRenderer.invoke("fetch-wifi-scheduled-restart", ip, cookie),
+
+  // WiFi Device Info endpoints
+  fetchWifiDeviceSystemInfo:    (ip, cookie) => ipcRenderer.invoke("fetch-wifi-device-system-info", ip, cookie),
+  fetchWifiDeviceBasicInfo:     (ip, cookie) => ipcRenderer.invoke("fetch-wifi-device-basic-info", ip, cookie),
+
   // Credentials management
   setDeviceCredentials: (ip, username, password) => ipcRenderer.invoke("set-device-credentials", ip, username, password),
   getDeviceCredentials: (ip) => ipcRenderer.invoke("get-device-credentials", ip),

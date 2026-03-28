@@ -139,13 +139,13 @@ export default function Controls() {
         </button>
 
         {/* Cloud Connect */}
-        <button
+        {/* <button
           onClick={() => setShowCloudModal(true)}
           className="btn btn-info text-white"
           style={{ display: "flex", alignItems: "center", gap: "6px" }}
         >
           ☁️ Connect Cloud
-        </button>
+        </button> */}
 
         <ExportButton />
       </div>
@@ -155,9 +155,9 @@ export default function Controls() {
         onHide={() => setShowCredentialsManager(false)}
       />
 
-      <CloudDeviceModal 
-        show={showCloudModal} 
-        onHide={() => setShowCloudModal(false)} 
+      <CloudDeviceModal
+        show={showCloudModal}
+        onHide={() => setShowCloudModal(false)}
       />
     </>
   );

@@ -174,6 +174,9 @@ async function speakerApi(ip, token, endpoint, method = "GET", body = null) {
 
 // PBX APIs moved to src/api/pbxClient.js for better organization
  
+
+//Wifi
+
  
 module.exports = {
   // IP Phone APIs (2 functions like speaker APIs)

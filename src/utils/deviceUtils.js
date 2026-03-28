@@ -64,6 +64,17 @@ export async function detectDeviceTypeDynamic(device, openPorts = []) {
     } catch (err) {
       console.warn(`❌ IP Phone login failed for ${device.ip}:`, err.message);
     }
+
+    // Try WiFi login
+    try {
+      const wifiResult = await window.api.wifiLogin(device.ip, "admin", "admin");
+      if (wifiResult && wifiResult.success) {
+        console.log(`✅ Detected WiFi Device for ${device.ip} via Login`);
+        return "WiFi";
+      }
+    } catch (err) {
+      console.warn(`❌ WiFi login failed for ${device.ip}:`, err.message);
+    }
   }
 
 

@@ -103,6 +103,35 @@ export const useDeviceDetails = () => {
         } catch (err) {
           console.warn("PBX API fetch failed:", err.message);
         }
+      } else if (type.includes("wifi")) {
+        // WiFi / Access Point
+        try {
+          info = {};
+          const loginResult = await window.api.wifiLogin(device.ip, "admin", "admin");
+          const token = loginResult.token;
+          console.log("WiFi login successful for", device.ip);
+
+          // Device Info
+          try { info.deviceBasic = await window.api.fetchWifiDeviceBasicInfo(device.ip, token); } catch (e) { console.warn("WiFi basic info failed:", e.message); }
+          try { info.deviceSystem = await window.api.fetchWifiDeviceSystemInfo(device.ip, token); } catch (e) { console.warn("WiFi system info failed:", e.message); }
+
+          // Wireless Info
+          try { info.wireless = await window.api.fetchWifiWirelessInfo(device.ip, token); } catch (e) { console.warn("WiFi wireless info failed:", e.message); }
+          try { info.wirelessParams = await window.api.fetchWifiWirelessParams(device.ip, token); } catch (e) { console.warn("WiFi wireless params failed:", e.message); }
+          try { info.userList = await window.api.fetchWifiUserList(device.ip, token); } catch (e) { console.warn("WiFi user list failed:", e.message); }
+          try { info.timeoutInfo = await window.api.fetchWifiTimeoutInfo(device.ip, token); } catch (e) { console.warn("WiFi timeout info failed:", e.message); }
+
+          // Config & Settings
+          try { info.configMgmt = await window.api.fetchWifiConfigManagement(device.ip, token); } catch (e) { console.warn("WiFi config mgmt failed:", e.message); }
+          try { info.language = await window.api.fetchWifiLanguageSettings(device.ip, token); } catch (e) { console.warn("WiFi language settings failed:", e.message); }
+          try { info.scheduledRestart = await window.api.fetchWifiScheduledRestart(device.ip, token); } catch (e) { console.warn("WiFi scheduled restart failed:", e.message); }
+
+          // System Logs
+          try { info.systemLogInfo = await window.api.fetchWifiSystemLogInfo(device.ip, token); } catch (e) { console.warn("WiFi system log info failed:", e.message); }
+          try { info.systemLogFiles = await window.api.fetchWifiSystemLogFiles(device.ip, token); } catch (e) { console.warn("WiFi system log files failed:", e.message); }
+        } catch (err) {
+          console.warn("WiFi API fetch failed:", err.message);
+        }
       } else {
         // IP phones / other
         try {
