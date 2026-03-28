@@ -7,6 +7,16 @@ export default function LogsPanel() {
   const [showLogs, setShowLogs] = useState(true);
   const { scanDevices, loading: scanning } = useDeviceScan();
 
+  const [scanMode, setScanMode] = useState("lite");
+
+  useEffect(() => {
+    if (window.api && window.api.onUpdateScanMode) {
+      window.api.onUpdateScanMode((newMode) => {
+        setScanMode(newMode);
+      });
+    }
+  }, []);
+
   useEffect(() => {
     // Override console methods to capture renderer logs
     const originalLog = console.log;
@@ -68,8 +78,8 @@ export default function LogsPanel() {
         <button onClick={() => scanDevices({ useNmap: true })} disabled={scanning}>
           {scanning ? "Scanning..." : "Re-Scan"}
         </button>
-        <button onClick={() => scanDevices({ useNmap: true, debugMode: true })} disabled={scanning}>
-          {scanning ? "Scanning..." : "Debug Scan (All Devices)"}
+        <button onClick={() => scanDevices({ useNmap: scanMode === "enterprise", debugMode: true }, scanMode)} disabled={scanning}>
+          {scanning ? "Scanning..." : `Debug Scan (${scanMode === "enterprise" ? "Nmap" : "Default"})`}
         </button>
         <button onClick={() => scanDevices({ useNmap: false, fallbackToArp: true })} disabled={scanning}>
           {scanning ? "Scanning..." : "ARP Scan Only"}
