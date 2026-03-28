@@ -7,7 +7,7 @@ export default function LogsPanel() {
   const [showLogs, setShowLogs] = useState(true);
   const { scanDevices, loading: scanning } = useDeviceScan();
 
-  const [scanMode, setScanMode] = useState("lite");
+  const [scanMode, setScanMode] = useState("enterprise");
 
   useEffect(() => {
     if (window.api && window.api.onUpdateScanMode) {
@@ -79,7 +79,7 @@ export default function LogsPanel() {
           {scanning ? "Scanning..." : "Re-Scan"}
         </button>
         <button onClick={() => scanDevices({ useNmap: scanMode === "enterprise", debugMode: true }, scanMode)} disabled={scanning}>
-          {scanning ? "Scanning..." : `Debug Scan (${scanMode === "enterprise" ? "Nmap" : "Default"})`}
+          {scanning ? "Scanning..." : `Debug Scan (${scanMode === "enterprise" ? "Nmap" : "Native"})`}
         </button>
         <button onClick={() => scanDevices({ useNmap: false, fallbackToArp: true })} disabled={scanning}>
           {scanning ? "Scanning..." : "ARP Scan Only"}

@@ -92,128 +92,128 @@ function createWindow() {
     } catch (e) { }
   };
 
-  createMenu(win);
+  // createMenu(win);
 }
 
-function createMenu(win) {
-  const isMac = process.platform === 'darwin';
+// function createMenu(win) {
+//   const isMac = process.platform === 'darwin';
 
-  const template = [
-    ...(isMac ? [{
-      label: app.name,
-      submenu: [
-        { role: 'about' },
-        { type: 'separator' },
-        { role: 'services' },
-        { type: 'separator' },
-        { role: 'hide' },
-        { role: 'hideOthers' },
-        { role: 'unhide' },
-        { type: 'separator' },
-        { role: 'quit' }
-      ]
-    }] : []),
-    {
-      label: 'File',
-      submenu: [
-        isMac ? { role: 'close' } : { role: 'quit' }
-      ]
-    },
-    {
-      label: 'Edit',
-      submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
-        { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        ...(isMac ? [
-          { role: 'pasteAndMatchStyle' },
-          { role: 'delete' },
-          { role: 'selectAll' },
-          { type: 'separator' },
-          {
-            label: 'Speech',
-            submenu: [
-              { role: 'startSpeaking' },
-              { role: 'stopSpeaking' }
-            ]
-          }
-        ] : [
-          { role: 'delete' },
-          { type: 'separator' },
-          { role: 'selectAll' }
-        ])
-      ]
-    },
-    {
-      label: 'View',
-      submenu: [
-        { role: 'reload' },
-        { role: 'forceReload' },
-        { role: 'toggleDevTools' },
-        { type: 'separator' },
-        { role: 'resetZoom' },
-        { role: 'zoomIn' },
-        { role: 'zoomOut' },
-        { type: 'separator' },
-        { role: 'togglefullscreen' }
-      ]
-    },
-    {
-      label: 'Scan',
-      submenu: [
-        {
-          label: 'Default Mode',
-          type: 'radio',
-          checked: true,
-          click: () => {
-            win.webContents.send('update-scan-mode', 'lite');
-          }
-        },
-        {
-          label: 'Nmap Mode',
-          type: 'radio',
-          checked: false,
-          click: () => {
-            win.webContents.send('update-scan-mode', 'enterprise');
-          }
-        }
-      ]
-    },
-    {
-      label: 'Window',
-      submenu: [
-        { role: 'minimize' },
-        { role: 'zoom' },
-        ...(isMac ? [
-          { type: 'separator' },
-          { role: 'front' },
-          { type: 'separator' },
-          { role: 'window' }
-        ] : [
-          { role: 'close' }
-        ])
-      ]
-    },
-    {
-      role: 'help',
-      submenu: [
-        {
-          label: 'About Dasscom',
-          click: async () => {
-            const { shell } = require('electron');
-            await shell.openExternal('https://dasscom.com');
-          }
-        }
-      ]
-    }
-  ];
+//   const template = [
+//     ...(isMac ? [{
+//       label: app.name,
+//       submenu: [
+//         { role: 'about' },
+//         { type: 'separator' },
+//         { role: 'services' },
+//         { type: 'separator' },
+//         { role: 'hide' },
+//         { role: 'hideOthers' },
+//         { role: 'unhide' },
+//         { type: 'separator' },
+//         { role: 'quit' }
+//       ]
+//     }] : []),
+//     {
+//       label: 'File',
+//       submenu: [
+//         isMac ? { role: 'close' } : { role: 'quit' }
+//       ]
+//     },
+//     {
+//       label: 'Edit',
+//       submenu: [
+//         { role: 'undo' },
+//         { role: 'redo' },
+//         { type: 'separator' },
+//         { role: 'cut' },
+//         { role: 'copy' },
+//         { role: 'paste' },
+//         ...(isMac ? [
+//           { role: 'pasteAndMatchStyle' },
+//           { role: 'delete' },
+//           { role: 'selectAll' },
+//           { type: 'separator' },
+//           {
+//             label: 'Speech',
+//             submenu: [
+//               { role: 'startSpeaking' },
+//               { role: 'stopSpeaking' }
+//             ]
+//           }
+//         ] : [
+//           { role: 'delete' },
+//           { type: 'separator' },
+//           { role: 'selectAll' }
+//         ])
+//       ]
+//     },
+//     {
+//       label: 'View',
+//       submenu: [
+//         { role: 'reload' },
+//         { role: 'forceReload' },
+//         { role: 'toggleDevTools' },
+//         { type: 'separator' },
+//         { role: 'resetZoom' },
+//         { role: 'zoomIn' },
+//         { role: 'zoomOut' },
+//         { type: 'separator' },
+//         { role: 'togglefullscreen' }
+//       ]
+//     },
+//     {
+//       label: 'Scan',
+//       submenu: [
+//         {
+//           label: 'Default Mode (Nmap)',
+//           type: 'radio',
+//           checked: true,
+//           click: () => {
+//             win.webContents.send('update-scan-mode', 'enterprise');
+//           }
+//         },
+//         {
+//           label: 'Native Mode',
+//           type: 'radio',
+//           checked: false,
+//           click: () => {
+//             win.webContents.send('update-scan-mode', 'lite');
+//           }
+//         }
+//       ]
+//     },
+//     {
+//       label: 'Window',
+//       submenu: [
+//         { role: 'minimize' },
+//         { role: 'zoom' },
+//         ...(isMac ? [
+//           { type: 'separator' },
+//           { role: 'front' },
+//           { type: 'separator' },
+//           { role: 'window' }
+//         ] : [
+//           { role: 'close' }
+//         ])
+//       ]
+//     },
+//     {
+//       role: 'help',
+//       submenu: [
+//         {
+//           label: 'About Dasscom',
+//           click: async () => {
+//             const { shell } = require('electron');
+//             await shell.openExternal('https://dasscom.com');
+//           }
+//         }
+//       ]
+//     }
+//   ];
 
-  const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
-}
+//   const menu = Menu.buildFromTemplate(template);
+//   Menu.setApplicationMenu(menu);
+// }
 
 // --- IPC handlers ---
 // IP Phone APIs (2 functions like speaker APIs)
@@ -279,23 +279,23 @@ ipcMain.handle("wifi-login", async (event, ip, username = "admin", password = "a
 ipcMain.handle("wifi-api", async (event, ip, cookie, endpoint, funname, action, body) => wifiApi(ip, cookie, endpoint, funname, action, body));
 
 // WiFi Wireless endpoints
-ipcMain.handle("fetch-wifi-wireless-info",         async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/wireless", 2, 1));
-ipcMain.handle("fetch-wifi-timeout-info",           async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/wireless", 2, 2));
-ipcMain.handle("fetch-wifi-user-list",              async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/wireless", 2, 3));
-ipcMain.handle("fetch-wifi-wireless-params",        async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/wireless", 2, 4));
+ipcMain.handle("fetch-wifi-wireless-info", async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/wireless", 2, 1));
+ipcMain.handle("fetch-wifi-timeout-info", async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/wireless", 2, 2));
+ipcMain.handle("fetch-wifi-user-list", async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/wireless", 2, 3));
+ipcMain.handle("fetch-wifi-wireless-params", async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/wireless", 2, 4));
 
 // WiFi System Log endpoints
-ipcMain.handle("fetch-wifi-system-log-info",        async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_log", 11, 1));
-ipcMain.handle("fetch-wifi-system-log-files",       async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_log", 11, 2));
+ipcMain.handle("fetch-wifi-system-log-info", async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_log", 11, 1));
+ipcMain.handle("fetch-wifi-system-log-files", async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_log", 11, 2));
 
 // WiFi Config & Settings endpoints
-ipcMain.handle("fetch-wifi-config-management",     async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 12, 1));
-ipcMain.handle("fetch-wifi-language-settings",     async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 12, 2));
-ipcMain.handle("fetch-wifi-scheduled-restart",     async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 12, 3));
+ipcMain.handle("fetch-wifi-config-management", async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 12, 1));
+ipcMain.handle("fetch-wifi-language-settings", async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 12, 2));
+ipcMain.handle("fetch-wifi-scheduled-restart", async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 12, 3));
 
 // WiFi Device Info endpoints
-ipcMain.handle("fetch-wifi-device-system-info",    async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 10, 1));
-ipcMain.handle("fetch-wifi-device-basic-info",     async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 10, 2));
+ipcMain.handle("fetch-wifi-device-system-info", async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 10, 1));
+ipcMain.handle("fetch-wifi-device-basic-info", async (event, ip, cookie) => wifiApi(ip, cookie, "/cgi-bin/sys_dev", 10, 2));
 
 // IP Phone API handlers using unified ipPhoneApi function
 ipcMain.handle("fetch-system-info", async (event, ip, token) => ipPhoneApi(ip, '/cgi-bin/infos.cgi?oper=query&param=version'));

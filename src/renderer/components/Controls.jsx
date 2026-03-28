@@ -18,7 +18,7 @@ export default function Controls() {
   const [showCloudModal, setShowCloudModal] = useState(false);
 
   // ── Scan Mode State: 'enterprise' (Nmap) | 'lite' (Native Node.js) ──
-  const [scanMode, setScanMode] = useState("lite");
+  const [scanMode, setScanMode] = useState("enterprise");
 
   // ── Listen for Scan Mode changes from the Native Menu ──
   useEffect(() => {
