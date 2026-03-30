@@ -1,10 +1,8 @@
 // src/utils/deviceUtils.js
 // Utility functions for device enrichment and API fetching
 
-
 import fs from 'fs';
 import path from 'path';
-
 
 /**
  * Normalize MAC address to standard format (uppercase, colon-separated)
@@ -13,7 +11,6 @@ export function normalizeMac(mac) {
   if (!mac || typeof mac !== "string") return null;
   return mac.replace(/-/g, ":").toUpperCase();
 }
-
 
 /**
  * Detect device type dynamically (simple heuristic)
@@ -24,43 +21,27 @@ export async function detectDeviceTypeDynamic(device, openPorts = []) {
   const macPrefix = normalizeMac(mac)?.split(":").slice(0, 3).join(":") || "";
   const v = (vendor || "").toLowerCase();
 
-
   // 1. API Login (First Priority) - Primarily for Dasscom devices
   if (macPrefix.startsWith("8C:1F:64")) {
     console.log(`🔍 Attempting API login detection for ${device.ip}...`);
-
-
-    // Try PBX login
     try {
-      const pbxResult = await window.api.pbxLogin(device.ip, "admin", "admin");
-      if (pbxResult && pbxResult.success) {
-        console.log(`✅ Detected PBX for ${device.ip} via Login`);
-        return "IPPBX";
-      }
+      await window.api.pbxLogin(device.ip, "admin", "admin");
+      console.log(`✅ Detected PBX for ${device.ip} via Login`);
+      return "PBX";
     } catch (err) {
       console.warn(`❌ PBX login failed for ${device.ip}:`, err.message);
     }
-
-
-    // Try Speaker login
     try {
-      const speakerResult = await window.api.speakerLogin(device.ip, "admin", "admin");
-      if (speakerResult) {
-        console.log(`✅ Detected Speaker for ${device.ip} via Login`);
-        return "Speaker";
-      }
+      await window.api.speakerLogin(device.ip, "admin", "admin");
+      console.log(`✅ Detected Speaker for ${device.ip} via Login`);
+      return "Speaker";
     } catch (err) {
       console.warn(`❌ Speaker login failed for ${device.ip}:`, err.message);
     }
-
-
-    // Try IP Phone login
     try {
-      const ipPhoneResult = await window.api.loginDevice(device.ip, "admin", "admin");
-      if (ipPhoneResult && ipPhoneResult.loginSuccess) {
-        console.log(`✅ Detected IP Phone for ${device.ip} via Login`);
-        return "IP Phone";
-      }
+      await window.api.loginDevice(device.ip, "admin", "admin");
+      console.log(`✅ Detected IP Phone for ${device.ip} via Login`);
+      return "IP Phone";
     } catch (err) {
       console.warn(`❌ IP Phone login failed for ${device.ip}:`, err.message);
     }
@@ -77,14 +58,12 @@ export async function detectDeviceTypeDynamic(device, openPorts = []) {
     }
   }
 
-
   // 2. Nmap Option (Second Priority)
   console.log(`🔍 Attempting Nmap scan detection for ${device.ip}...`);
   try {
     const nmapOutput = await window.api.nmapScan(device.ip);
     if (nmapOutput) {
       const output = nmapOutput.toLowerCase();
-
 
       if (output.includes("device type: general purpose") && output.includes("webcam")) {
         console.log(`✅ Detected Camera for ${device.ip} via Nmap`);
@@ -135,7 +114,6 @@ export async function detectDeviceTypeDynamic(device, openPorts = []) {
     console.warn(`❌ NMAP scan failed for ${device.ip}:`, nmapErr.message);
   }
 
-
   // 3. Vendor Mapping (Third Priority)
   console.log(`🔍 Attempting Vendor Mapping detection for ${device.ip}...`);
   try {
@@ -152,12 +130,9 @@ export async function detectDeviceTypeDynamic(device, openPorts = []) {
     console.warn('❌ Failed to load device mappings:', fsErr.message);
   }
 
-
   console.log(`⚠️ Detected Unknown for ${device.ip} (${device.mac || "Unknown"})`);
   return "Unknown";
 }
-
-
 
 
 /**
@@ -169,7 +144,6 @@ export async function enrichDevice(device) {
   const type = device.type || "Unknown";
   const online = device.online !== undefined ? device.online : true; // Default to true if not provided
 
-
   return {
     ...device,
     mac,
@@ -179,17 +153,14 @@ export async function enrichDevice(device) {
   };
 }
 
-
 /**
  * Fetch details for a device from backend APIs (via preload -> ipcRenderer)
  */
 export async function fetchDeviceDetails(device) {
   if (!device || !device.ip) return { error: "Invalid device" };
 
-
   try {
     let details = {};
-
 
     // Example: try speaker API
     if (device.type === "Speaker" || device.type === "Extension") {
@@ -202,7 +173,6 @@ export async function fetchDeviceDetails(device) {
       }
     }
 
-
     // Example: try IP Phone
     if (device.type === "IP Phone") {
       try {
@@ -214,13 +184,9 @@ export async function fetchDeviceDetails(device) {
       }
     }
 
-
     return { ...device, details };
   } catch (error) {
     console.error("❌ Error fetching device details:", error);
     return { ...device, error: error.message };
   }
 }
-
-
-

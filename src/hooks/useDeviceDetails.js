@@ -1,32 +1,26 @@
 import { useState } from "react";
 import { useDeviceContext } from "../renderer/context/DeviceContext";
 
-
 export const useDeviceDetails = () => {
   const { setSelectedDevice } = useDeviceContext();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-
   const fetchDetails = async (device) => {
     setLoading(true);
     setError(null);
-
 
     try {
       let info = null;
       const type = (device.type || "").toLowerCase();
 
-
-      if (type.includes("speaker")) {
+      if (type.includes("speaker"))  {
         try {
           const token = await window.api.speakerLogin(device.ip, "admin", "admin");
           const systemInfo = await window.api.speakerApi(device.ip, token, "/api/get-system-info");
           const volumePriority = await window.api.speakerApi(device.ip, token, "/api/get-volume-priority");
           const provisioning = await window.api.speakerApi(device.ip, token, "/api/get-privisioning");
           const sipSlave1Info = await window.api.speakerApi(device.ip, token, "/api/get-sip-slave1-info");
-
-
 
 
           const sipSlave2Info = await window.api.speakerApi(device.ip, token, "/api/get-sip-slave2-info");
@@ -37,8 +31,7 @@ export const useDeviceDetails = () => {
           const language = await window.api.speakerApi(device.ip, token, "/api/get-language");
           const audio = await window.api.speakerApi(device.ip, token, "/api/get-audio-codec");
 
-
-          info = { systemInfo, volumePriority, provisioning, sipSlave1Info, sipSlave2Info, functionInfo, masterInfo, advanceInfo, sip, language, audio };
+          info = { systemInfo, volumePriority, provisioning, sipSlave1Info,sipSlave2Info , functionInfo, masterInfo, advanceInfo, sip,language , audio};
         } catch (err) {
           console.warn("Speaker API fetch failed:", err.message);
         }
@@ -70,11 +63,8 @@ export const useDeviceDetails = () => {
       } else if (type.includes("pbx")) {
         // PBX devices
         try {
-          info = {}; // Initialize info object
-          const loginResult = await window.api.pbxLogin(device.ip, "admin", "admin");
-          const token = loginResult.token;
+          const token = await window.api.pbxLogin(device.ip, "admin", "admin");
           console.log("PBX login successful for", device.ip);
-
 
           // Fetch common PBX system info
           try { info.systemTime = await window.api.fetchPbxSystemTime(device.ip, token); } catch (e) { console.warn("PBX systemTime failed:", e.message); }
@@ -86,19 +76,16 @@ export const useDeviceDetails = () => {
           try { info.extensionStatus = await window.api.fetchPbxExtensionStatus(device.ip, token); } catch (e) { console.warn("PBX extensionStatus failed:", e.message); }
           try { info.trunkInfo = await window.api.fetchPbxTrunkInfo(device.ip, token); } catch (e) { console.warn("PBX trunkInfo failed:", e.message); }
 
-
           // Device-specific endpoints based on model (if available)
           try {
             const extensions = await window.api.fetchPbxSearchExtensions(device.ip, token);
             info.extensions = extensions;
           } catch (e) { console.warn("PBX extensions failed:", e.message); }
 
-
           try {
             const extensionInfo = await window.api.fetchPbxExtensionInfo(device.ip, token);
             info.extensionInfo = extensionInfo;
           } catch (e) { console.warn("PBX extensionInfo failed:", e.message); }
-
 
         } catch (err) {
           console.warn("PBX API fetch failed:", err.message);
@@ -155,7 +142,6 @@ export const useDeviceDetails = () => {
         try { info.allAccountInformation = await window.api.fetchAllAcountInformation(device.ip); } catch (e) { console.warn("allAccountInformation failed:", e.message); }
       }
 
-
       setSelectedDevice({ ...device, info });
       return { success: true, info };
     } catch (err) {
@@ -166,10 +152,6 @@ export const useDeviceDetails = () => {
       setLoading(false);
     }
   };
-
-
+ 
   return { fetchDetails, loading, error };
 };
-
-
-
